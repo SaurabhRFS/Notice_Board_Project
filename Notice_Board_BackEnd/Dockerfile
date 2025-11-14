@@ -1,6 +1,6 @@
 # --- 1. The "Build" Stage ---
-# We use a standard "builder" image that has Java and Maven
-FROM eclipse-temurin:21-jdk-jammy AS builder
+# We now use the "builder" image that has Java 25
+FROM eclipse-temurin:25-jdk-jammy AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -13,7 +13,8 @@ RUN ./mvnw clean install -DskipTests
 
 # --- 2. The "Run" Stage ---
 # Now, start with a fresh, tiny "runner" image
-FROM eclipse-temurin:21-jre-jammy
+# We also use the Java 25 JRE (Java Runtime Environment)
+FROM eclipse-temurin:25-jre-jammy
 
 # Set the working directory
 WORKDIR /app
