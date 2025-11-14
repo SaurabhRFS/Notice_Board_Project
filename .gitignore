@@ -1,0 +1,22 @@
+# --- Java / Spring Boot ---
+/target/
+.mvn/
+*.jar
+*.war
+.idea/
+*.log
+
+# --- Secrets (CRITICAL) ---
+# This line MUST NOT start with a #
+# This tells git to IGNORE your passwords
+Notice_Board_BackEnd/src/main/resources/application.properties
+
+# --- React / Node ---
+/Notice_Board_FrontEnd/node_modules/
+/Notice_Board_FrontEnd/dist/
+/Notice_Board_FrontEnd/.vite/
+npm-debug.log
+yarn-error.log
+
+# --- OS Files ---
+.DS_Store
