@@ -1,6 +1,5 @@
 # --- Java / Spring Boot ---
 /target/
-.mvn/
 *.jar
 *.war
 .idea/
