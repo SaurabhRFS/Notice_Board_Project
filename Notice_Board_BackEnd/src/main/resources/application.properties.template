@@ -23,7 +23,7 @@ spring.main.banner-mode=console
 # --- Google OAuth2 Configuration ---
 spring.security.oauth2.client.registration.google.client-id=YOUR_GOOGLE_CLIENT_ID_HERE
 spring.security.oauth2.client.registration.google.client-secret=YOUR_GOOGLE_CLIENT_SECRET_HERE
-spring.security.oauth2.client.registration.google.redirect-uri=http://localhost:8080/login/oauth2/code/google
+spring.security.oauth2.client.registration.google.redirect-uri=httpsS://notice-board-project-cqfv.onrender.com/login/oauth2/code/google
 spring.security.oauth2.client.registration.google.scope=email, profile
 
 # --- Cloudinary File Storage Configuration ---
