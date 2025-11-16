@@ -1,5 +1,7 @@
 // src/pages/LoginPage.jsx
 
+import { API_BASE_URL } from '../apiConfig'; // <-- ADD THIS
+
 import React, { useState } from 'react';
 import axios from 'axios'; // 1. Import our new "messenger"
 import { useNavigate } from 'react-router-dom'; // 2. Import the "redirect" tool
@@ -10,10 +12,10 @@ function LoginPage() {
   const [error, setError] = useState(''); // 3. A "memory box" for error messages
   const navigate = useNavigate(); // 4. Get the "redirect" tool
 
-  // This is the URL of our backend's login "door"
-  const LOGIN_URL = 'http://localhost:8080/api/auth/login';
-  const GOOGLE_AUTH_URL = "http://localhost:8080/oauth2/authorization/google";
-
+// --- THIS IS THE FIX ---
+  const LOGIN_URL = `${API_BASE_URL}/api/auth/login`;
+  const GOOGLE_AUTH_URL = `${API_BASE_URL}/oauth2/authorization/google`;
+// -------------------------
   // 5. This function is now "smart"
   const handleLogin = async () => {
     setError(''); // Clear any old errors

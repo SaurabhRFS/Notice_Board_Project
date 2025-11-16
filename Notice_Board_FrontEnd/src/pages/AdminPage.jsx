@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../apiConfig'; // <-- 1. ADDED THIS IMPORT
 
 function AdminPage() {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ function AdminPage() {
   const [branches, setBranches] = useState([]);
   const [semesters, setSemesters] = useState([]);
 
-  // --- 1. NEW "MEMORY BOX" FOR THE USER LIST ---
+  // --- "Memory box" for the user list ---
   const [users, setUsers] = useState([]);
 
   // --- "On Load" function (useEffect) ---
@@ -29,26 +30,25 @@ function AdminPage() {
     }
     const authConfig = { headers: { 'Authorization': `Bearer ${token}` } };
     
-    // Fetch data for dropdowns
-    axios.get('http://localhost:8080/api/data/branches', authConfig).then(res => setBranches(res.data));
-    axios.get('http://localhost:8080/api/data/semesters', authConfig).then(res => setSemesters(res.data));
+    // --- 2. RE-WIRED THESE URLS ---
+    axios.get(`${API_BASE_URL}/api/data/branches`, authConfig).then(res => setBranches(res.data));
+    axios.get(`${API_BASE_URL}/api/data/semesters`, authConfig).then(res => setSemesters(res.data));
 
-    // --- 2. NEW: Load the list of all users ---
+    // Load the list of all users
     fetchUsers();
   }, [token, navigate]);
 
-  // --- 3. NEW: Function to get all users ---
+  // --- Function to get all users ---
   const fetchUsers = () => {
     const authConfig = { headers: { 'Authorization': `Bearer ${token}` } };
-    axios.get('http://localhost:8080/api/admin/users', authConfig)
+    // --- 3. RE-WIRED THIS URL ---
+    axios.get(`${API_BASE_URL}/api/admin/users`, authConfig)
       .then(res => setUsers(res.data))
       .catch(err => console.error("Could not fetch users", err));
   };
 
-  // --- "Create Subject" button logic (No change) ---
+  // --- "Create Subject" button logic ---
   const handleCreateSubject = async () => {
-    // ... (your existing create subject logic)
-    // ... (On success, it redirects to '/')
     setError('');
     const authConfig = { headers: { 'Authorization': `Bearer ${token}` } };
     const subjectData = {
@@ -57,7 +57,8 @@ function AdminPage() {
       semester: subjectSemester
     };
     try {
-      await axios.post('http://localhost:8080/api/admin/subjects', subjectData, authConfig);
+      // --- 4. RE-WIRED THIS URL ---
+      await axios.post(`${API_BASE_URL}/api/admin/subjects`, subjectData, authConfig);
       alert('Subject created successfully!');
       navigate('/'); // Redirect back to the Home page
     } catch (err) {
@@ -66,7 +67,7 @@ function AdminPage() {
     }
   };
 
-  // --- 4. NEW: "PROMOTE USER" LOGIC ---
+  // --- "PROMOTE USER" LOGIC ---
   const handlePromoteUser = async (userId) => {
     if (!window.confirm('Are you sure you want to promote this user to TEACHER?')) {
       return;
@@ -75,8 +76,8 @@ function AdminPage() {
     const authConfig = { headers: { 'Authorization': `Bearer ${token}` } };
 
     try {
-      // Call the "Promote User" API we built
-      await axios.put(`http://localhost:8080/api/admin/users/${userId}/promote`, {}, authConfig);
+      // --- 5. RE-WIRED THIS URL ---
+      await axios.put(`${API_BASE_URL}/api/admin/users/${userId}/promote`, {}, authConfig);
       
       // Success!
       alert('User promoted to Teacher!');
@@ -96,12 +97,40 @@ function AdminPage() {
 
       {/* --- "Create Subject" Form --- */}
       <div style={{ background: '#eee', padding: '10px' }}>
-        {/* ... (Your existing "Create Subject" form - no change) ... */}
+        <h3>Create New Subject</h3>
+        <div>
+          <input 
+            type="text" 
+            placeholder="Subject Name (e.g., DSA)"
+            value={subjectName}
+            onChange={(e) => setSubjectName(e.target.value)}
+          />
+        </div>
+        <div>
+          <select value={subjectBranch} onChange={(e) => setSubjectBranch(e.target.value)}>
+            <option value="">Select Branch...</option>
+            {branches.map(branch => (
+              <option key={branch} value={branch}>{branch}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <select value={subjectSemester} onChange={(e) => setSubjectSemester(e.target.value)}>
+            <option value="">Select Semester...</option>
+            {semesters.map(sem => (
+              <option key={sem} value={sem}>{sem}</option>
+            ))}
+          </select>
+        </div>
+        <button onClick={handleCreateSubject} style={{ marginTop: '10px' }}>
+          Create Subject
+        </button>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
       </div>
 
       <hr />
 
-      {/* --- 5. NEW: "USER MANAGEMENT" SECTION --- */}
+      {/* --- "USER MANAGEMENT" SECTION --- */}
       <div style={{ background: '#f9f9f9', padding: '10px', marginTop: '20px' }}>
         <h3>User Management</h3>
         <table border="1" style={{ width: '100%' }}>

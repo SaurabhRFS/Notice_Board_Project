@@ -56,13 +56,19 @@ public class SecurityConfig {
     }
     
     // This bean defines the CORS rules for our React app
+   // ... (inside SecurityConfig.java)
+
+    // This bean defines the CORS rules for our React app
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
         // --- THIS IS THE FIX ---
-        // We now allow both port 3000 (standard React) and 5173 (Vite)
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173"));
+        // We now allow your "home" app AND your "live" Vercel app
+        configuration.setAllowedOrigins(List.of(
+            "http://localhost:5173", 
+            "https://notice-board-frontend-five.vercel.app"
+        ));
         
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
@@ -72,6 +78,8 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
+    // ... (rest of your SecurityConfig file)
     
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthFilter) throws Exception {

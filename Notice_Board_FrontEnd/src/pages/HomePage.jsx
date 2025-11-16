@@ -1,5 +1,5 @@
 // src/pages/HomePage.jsx
-
+import { API_BASE_URL } from '../apiConfig'; // <-- ADD THIS
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -38,9 +38,9 @@ function HomePage() {
     const authConfig = { headers: { 'Authorization': `Bearer ${token}` } };
     
     // Fetch data for dropdowns
-    axios.get('http://localhost:8080/api/data/branches', authConfig).then(res => setBranches(res.data));
-    axios.get('http://localhost:8080/api/data/semesters', authConfig).then(res => setSemesters(res.data));
-    axios.get('http://localhost:8080/api/data/subjects', authConfig).then(res => setSubjects(res.data));
+    axios.get(`${API_BASE_URL}/api/data/branches`, authConfig).then(res => setBranches(res.data));
+    axios.get(`${API_BASE_URL}/api/data/semesters`, authConfig).then(res => setSemesters(res.data));
+    axios.get(`${API_BASE_URL}/api/data/subjects`, authConfig).then(res => setSubjects(res.data));
     handleFilter(); // Load all notices on start
   }, [token, navigate]);
 
@@ -54,7 +54,7 @@ function HomePage() {
         subjectId: selectedSubject || null
       }
     };
-    axios.get('http://localhost:8080/api/notices', authConfig)
+    axios.get(`${API_BASE_URL}/api/notices`, authConfig)
       .then(response => setNotices(response.data))
       .catch(error => console.error('Error fetching notices:', error));
   };
@@ -89,7 +89,7 @@ function HomePage() {
       formData.append('file', newNoticeFile);
     }
     try {
-      await axios.post('http://localhost:8080/api/notices', formData, authConfig);
+      await axios.post(`${API_BASE_URL}/api/notices`, formData, authConfig);
       setIsFormVisible(false);
       setNewNoticeTitle('');
       setNewNoticeContent('');
@@ -109,7 +109,7 @@ function HomePage() {
     if (!window.confirm('Are you sure?')) return;
     const authConfig = { headers: { 'Authorization': `Bearer ${token}` } };
     try {
-      await axios.delete(`http://localhost:8080/api/notices/${noticeId}`, authConfig);
+      await axios.delete(`${API_BASE_URL}/api/notices/${noticeId}`, authConfig);
       handleFilter(); // Refresh list
     } catch (err) {
       alert('Failed to delete notice.');
@@ -239,7 +239,6 @@ function HomePage() {
                   >
                     Delete
                   </button>
-                  {/* The upload button is now part of the "Create" form */}
                 </div>
               )}
             </div>

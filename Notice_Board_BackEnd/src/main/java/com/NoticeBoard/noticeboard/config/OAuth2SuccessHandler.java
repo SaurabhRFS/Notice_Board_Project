@@ -63,7 +63,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // 5. Send the user back to React with BOTH the token AND the role
         
         // This is the URL of your React app's "catcher" page
-        String targetUrl = "http://localhost:5173/oauth2/redirect"; 
+        // --- THIS IS THE FIX ---
+        String targetUrl = "https://notice-board-frontend-five.vercel.app/oauth2/redirect";
         
         String redirectUrl = UriComponentsBuilder.fromUriString(targetUrl)
                 .queryParam("token", token)
