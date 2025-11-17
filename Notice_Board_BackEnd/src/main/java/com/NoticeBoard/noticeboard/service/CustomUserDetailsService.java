@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
-@Service // This is a "Manager"
+@Service
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
@@ -21,16 +21,19 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // This is the "User Finder" logic
         User appUser = userRepository.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority(appUser.getRole().name());
 
-        // This is the "translation" to a Spring Security user
+        // --- THE CRASH FIX ---
+        // Google users have no password (null). 
+        // We use a dummy string "" so Spring Security doesn't crash.
+        String password = (appUser.getPassword() != null) ? appUser.getPassword() : "";
+
         return new org.springframework.security.core.userdetails.User(
             appUser.getEmail(),
-            appUser.getPassword(),
+            password, 
             Collections.singletonList(authority)
         );
     }

@@ -1,16 +1,15 @@
 // src/pages/HomePage.jsx
-import { API_BASE_URL } from '../apiConfig'; // <-- ADD THIS
+import { API_BASE_URL } from '../apiConfig';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 function HomePage() {
-  // --- 1. Read the "wallet" (localStorage) ---
   const navigate = useNavigate();
   const userRole = localStorage.getItem('userRole');
   const token = localStorage.getItem('token');
 
-  // --- 2. "Memory boxes" for Filters ---
+  // Filters
   const [branches, setBranches] = useState([]);
   const [semesters, setSemesters] = useState([]);
   const [subjects, setSubjects] = useState([]);
@@ -19,17 +18,21 @@ function HomePage() {
   const [selectedSubject, setSelectedSubject] = useState('');
   const [notices, setNotices] = useState([]);
 
-  // --- 3. "Memory boxes" for the "All-in-One" Create Form ---
+  // Create Form State
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [newNoticeTitle, setNewNoticeTitle] = useState('');
   const [newNoticeContent, setNewNoticeContent] = useState('');
   const [newNoticeSubject, setNewNoticeSubject] = useState('');
+  
+  // --- NEW STATE FOR CREATION ---
+  const [newNoticeBranch, setNewNoticeBranch] = useState('GENERAL'); // Default to General
+  // -----------------------------
+
   const [newNoticeSemesters, setNewNoticeSemesters] = useState([]);
   const [newNoticeExpiresAt, setNewNoticeExpiresAt] = useState('');
   const [newNoticeFile, setNewNoticeFile] = useState(null);
   const [createError, setCreateError] = useState('');
 
-  // --- 4. "On Load" function (useEffect) ---
   useEffect(() => {
     if (!token) {
       navigate('/login');
@@ -37,14 +40,12 @@ function HomePage() {
     }
     const authConfig = { headers: { 'Authorization': `Bearer ${token}` } };
     
-    // Fetch data for dropdowns
     axios.get(`${API_BASE_URL}/api/data/branches`, authConfig).then(res => setBranches(res.data));
     axios.get(`${API_BASE_URL}/api/data/semesters`, authConfig).then(res => setSemesters(res.data));
     axios.get(`${API_BASE_URL}/api/data/subjects`, authConfig).then(res => setSubjects(res.data));
-    handleFilter(); // Load all notices on start
+    handleFilter(); 
   }, [token, navigate]);
 
-  // --- 5. "Filter" button logic ---
   const handleFilter = () => {
     const authConfig = {
       headers: { 'Authorization': `Bearer ${token}` },
@@ -59,14 +60,12 @@ function HomePage() {
       .catch(error => console.error('Error fetching notices:', error));
   };
 
-  // --- 6. "Logout" button logic ---
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userRole');
     navigate('/login');
   };
 
-  // --- 7. "Create Notice" logic (All-in-One Form) ---
   const handleCreateNotice = async () => {
     setCreateError('');
     const authConfig = {
@@ -75,14 +74,21 @@ function HomePage() {
         'Content-Type': 'multipart/form-data'
       }
     };
+    
     const noticeData = {
       title: newNoticeTitle,
       content: newNoticeContent,
       subjectId: newNoticeSubject || null,
+      
+      // --- SEND THE SELECTED BRANCH ---
+      targetBranch: newNoticeBranch, 
+      // --------------------------------
+
       targetSemesters: newNoticeSemesters,
       expiresAt: newNoticeExpiresAt || null,
       isPinned: false
     };
+
     const formData = new FormData();
     formData.append('notice', JSON.stringify(noticeData));
     if (newNoticeFile) {
@@ -91,39 +97,37 @@ function HomePage() {
     try {
       await axios.post(`${API_BASE_URL}/api/notices`, formData, authConfig);
       setIsFormVisible(false);
+      // Reset form
       setNewNoticeTitle('');
       setNewNoticeContent('');
       setNewNoticeSubject('');
+      setNewNoticeBranch('GENERAL'); // Reset to General
       setNewNoticeSemesters([]);
       setNewNoticeExpiresAt('');
       setNewNoticeFile(null);
-      handleFilter(); // Refresh the list!
+      handleFilter(); 
     } catch (err) {
       console.error('Error creating notice:', err);
       setCreateError('Failed to create notice. Please try again.');
     }
   };
 
-  // --- 8. "Delete Notice" logic ---
   const handleDeleteNotice = async (noticeId) => {
     if (!window.confirm('Are you sure?')) return;
     const authConfig = { headers: { 'Authorization': `Bearer ${token}` } };
     try {
       await axios.delete(`${API_BASE_URL}/api/notices/${noticeId}`, authConfig);
-      handleFilter(); // Refresh list
+      handleFilter(); 
     } catch (err) {
       alert('Failed to delete notice.');
     }
   };
 
-  // --- 9. The HTML (JSX) ---
   return (
     <div>
       <h1>Notice Board Home</h1>
       <button onClick={handleLogout}>Logout</button>
 
-      {/* --- THIS IS THE NEW ADMIN BUTTON --- */}
-      {/* It only shows if you are an ADMIN */}
       {(userRole === 'ROLE_ADMIN') && (
         <button 
           onClick={() => navigate('/admin')} 
@@ -132,11 +136,10 @@ function HomePage() {
           Admin Panel
         </button>
       )}
-      {/* ---------------------------------- */}
 
       <hr />
 
-      {/* --- The "Smart" 3-Dropdown Filter --- */}
+      {/* Filters */}
       <div>
         <select value={selectedBranch} onChange={(e) => setSelectedBranch(e.target.value)}>
           <option value="">Select Branch (All)</option>
@@ -154,7 +157,7 @@ function HomePage() {
       </div>
       <hr />
 
-      {/* --- "Create Notice" Section --- */}
+      {/* Create Notice Form */}
       {(userRole === 'ROLE_TEACHER' || userRole === 'ROLE_ADMIN') && (
         <div style={{ background: '#eee', padding: '10px', marginBottom: '15px' }}>
           <h3>Teacher / Admin Controls</h3>
@@ -166,9 +169,22 @@ function HomePage() {
               <h4>New Notice</h4>
               <div><input type="text" placeholder="Title" value={newNoticeTitle} onChange={(e) => setNewNoticeTitle(e.target.value)} /></div>
               <div><textarea placeholder="Content" value={newNoticeContent} onChange={(e) => setNewNoticeContent(e.target.value)} /></div>
+              
+              {/* --- NEW BRANCH DROPDOWN --- */}
+              <div>
+                <label>Target Branch: </label>
+                <select value={newNoticeBranch} onChange={(e) => setNewNoticeBranch(e.target.value)}>
+                   <option value="GENERAL">GENERAL (All Branches)</option>
+                   {branches.map(branch => (
+                     <option key={branch} value={branch}>{branch}</option>
+                   ))}
+                </select>
+              </div>
+              {/* --------------------------- */}
+
               <div>
                 <select value={newNoticeSubject} onChange={(e) => setNewNoticeSubject(e.target.value)}>
-                  <option value="">Select Subject (General)</option>
+                  <option value="">Select Subject (Optional)</option>
                   {subjects.map(subject => (<option key={subject.id} value={subject.id}>{subject.name}</option>))}
                 </select>
               </div>
@@ -188,18 +204,11 @@ function HomePage() {
               </div>
               <div>
                 <label>Auto-delete on:</label>
-                <input 
-                  type="date"
-                  value={newNoticeExpiresAt}
-                  onChange={(e) => setNewNoticeExpiresAt(e.target.value)}
-                />
+                <input type="date" value={newNoticeExpiresAt} onChange={(e) => setNewNoticeExpiresAt(e.target.value)} />
               </div>
               <div>
                 <label>Attachment:</label>
-                <input 
-                  type="file"
-                  onChange={(e) => setNewNoticeFile(e.target.files[0])}
-                />
+                <input type="file" onChange={(e) => setNewNoticeFile(e.target.files[0])} />
               </div>
               <button onClick={handleCreateNotice} style={{ marginTop: '10px' }}>Submit Notice</button>
               {createError && <p style={{ color: 'red' }}>{createError}</p>}
@@ -208,7 +217,7 @@ function HomePage() {
         </div>
       )}
       
-      {/* --- The "Smart" Notice List --- */}
+      {/* Notice List */}
       <h2>Notices</h2>
       <div>
         {notices.length === 0 ? (
@@ -219,6 +228,7 @@ function HomePage() {
               <h3>{notice.title}</h3>
               <p>{notice.content}</p>
               <p><b>Posted by:</b> {notice.author.username}</p>
+              {notice.targetBranch && <p><b>Branch:</b> {notice.targetBranch}</p>}
               {notice.subject && <p><b>Subject:</b> {notice.subject.name}</p>}
               
               {notice.attachmentUrls && notice.attachmentUrls.length > 0 && (

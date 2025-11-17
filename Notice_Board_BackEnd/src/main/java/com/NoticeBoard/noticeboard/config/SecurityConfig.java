@@ -11,7 +11,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService; 
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -20,18 +20,19 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+// New imports for the Popup Header Fix
+import org.springframework.security.web.header.writers.CrossOriginOpenerPolicyHeaderWriter.CrossOriginOpenerPolicy;
+import org.springframework.security.web.header.writers.CrossOriginEmbedderPolicyHeaderWriter.CrossOriginEmbedderPolicy;
+
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final OAuth2SuccessHandler oAuth2SuccessHandler;
-    private final UserDetailsService userDetailsService; // <-- This is now our "CustomUserDetailsService"
+    private final UserDetailsService userDetailsService;
 
-    // We inject our handler and the generic UserDetailsService
-    public SecurityConfig(OAuth2SuccessHandler oAuth2SuccessHandler, UserDetailsService userDetailsService) {
-        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+    public SecurityConfig(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 
@@ -45,31 +46,21 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // We DELETED the UserDetailsService bean from here
-
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService); // We use our injected service
+        authProvider.setUserDetailsService(userDetailsService); 
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
-    
-    // This bean defines the CORS rules for our React app
-   // ... (inside SecurityConfig.java)
 
-    // This bean defines the CORS rules for our React app
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
-        // --- THIS IS THE FIX ---
-        // We now allow your "home" app AND your "live" Vercel app
         configuration.setAllowedOrigins(List.of(
             "http://localhost:5173", 
             "https://notice-board-frontend-five.vercel.app"
         ));
-        
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -79,44 +70,55 @@ public class SecurityConfig {
         return source;
     }
 
-    // ... (rest of your SecurityConfig file)
-    
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthFilter) throws Exception {
         
         http
             .cors(corsConfig -> corsConfig.configurationSource(corsConfigurationSource()))
             .csrf(csrfConfig -> csrfConfig.disable())
+
+            // --- 1. HEADER FIX FOR GOOGLE POPUP ---
+            .headers(headers -> headers
+                .crossOriginOpenerPolicy(policy -> policy
+                    .policy(CrossOriginOpenerPolicy.SAME_ORIGIN_ALLOW_POPUPS)
+                )
+                .crossOriginEmbedderPolicy(policy -> policy
+                    .policy(CrossOriginEmbedderPolicy.UNSAFE_NONE)
+                )
+            )
+
             .exceptionHandling(ex -> ex
                 .accessDeniedHandler((request, response, accessDeniedException) -> 
                     response.setStatus(HttpServletResponse.SC_FORBIDDEN)
                 )
             )
             .authorizeHttpRequests(auth -> auth
+                // 2. Admin Only Routes
                 .requestMatchers("/api/admin/**").hasRole("ADMIN") 
+                
+                // --- 3. THE FIX: ALLOW STUDENTS TO SEE DROPDOWNS ---
+                .requestMatchers("/api/data/**").authenticated() 
                 .requestMatchers("/api/profile/**").authenticated()
+
+                // 4. Public Routes
                 .requestMatchers("/api").permitAll()
-                .requestMatchers("/api/auth/**").permitAll() 
+                .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/login/oauth2/**").permitAll()
+
+                // 5. Notice Permissions (Viewing allowed for everyone logged in)
                 .requestMatchers(HttpMethod.GET, "/api/notices", "/api/notices/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
+                // Creating/Deleting Notices (Teachers/Admins only)
                 .requestMatchers(HttpMethod.POST, "/api/notices", "/api/notices/**").hasAnyRole("TEACHER", "ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/notices/**").hasAnyRole("TEACHER", "ADMIN")
+                
+                // 6. Catch-all
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            .oauth2Login(oauth2 -> oauth2
-                .authorizationEndpoint(endpoint -> endpoint
-                    .baseUri("/oauth2/authorization")
-                )
-                .redirectionEndpoint(endpoint -> endpoint
-                    .baseUri("/login/oauth2/code/*")
-                )
-                .successHandler(oAuth2SuccessHandler)
-            );
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

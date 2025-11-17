@@ -1,50 +1,71 @@
 // src/pages/LoginPage.jsx
 
-import { API_BASE_URL } from '../apiConfig'; // <-- ADD THIS
-
 import React, { useState } from 'react';
-import axios from 'axios'; // 1. Import our new "messenger"
-import { useNavigate } from 'react-router-dom'; // 2. Import the "redirect" tool
+import axios from 'axios'; 
+import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../apiConfig'; // Ensures we point to your Render backend
+
+// Import the Firebase tools (using Popup)
+import { auth, googleProvider } from '../firebase'; 
+import { signInWithPopup } from 'firebase/auth'; 
 
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(''); // 3. A "memory box" for error messages
-  const navigate = useNavigate(); // 4. Get the "redirect" tool
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-// --- THIS IS THE FIX ---
-  const LOGIN_URL = `${API_BASE_URL}/api/auth/login`;
-  const GOOGLE_AUTH_URL = `${API_BASE_URL}/oauth2/authorization/google`;
-// -------------------------
-  // 5. This function is now "smart"
+  // --- 1. Local Login (Email/Password) ---
   const handleLogin = async () => {
-    setError(''); // Clear any old errors
-
+    setError('');
     try {
-      // 6. Use the "messenger" to call our API
-      const response = await axios.post(LOGIN_URL, {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
         email: email,
         password: password
       });
-
-      // 7. If the login is a SUCCESS:
-      console.log('Success:', response.data);
       
-      // 8. Get the "wristband" (token) and "role" from the response
-      const token = response.data.token;
-      const role = response.data.role;
-
-      // 9. Save them to the browser's "wallet" (localStorage)
+      // Save the "wristband" (token) and role
+      const { token, role } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('userRole', role);
-
-      // 10. Redirect to the home page!
+      
+      // Go to Home
       navigate('/'); 
 
     } catch (err) {
-      // 11. If the login is a FAILURE:
       console.error('Login failed:', err);
       setError('Invalid email or password. Please try again.');
+    }
+  };
+
+  // --- 2. Google Login (Popup Flow) ---
+  const handleGoogleLogin = async () => {
+    setError('');
+    
+    try {
+      // A. Open the Firebase Popup
+      // (This works now because we removed the strict headers from vite.config.js)
+      const result = await signInWithPopup(auth, googleProvider);
+      
+      // B. Get the "Firebase wristband"
+      const idToken = await result.user.getIdToken();
+
+      // C. Send it to our Backend "Handshake" Endpoint
+      const response = await axios.post(`${API_BASE_URL}/api/auth/google`, {
+        token: idToken 
+      });
+
+      // D. Backend sends back OUR app's token
+      const { token, role } = response.data;
+
+      // E. Save and Navigate
+      localStorage.setItem('token', token);
+      localStorage.setItem('userRole', role);
+      navigate('/'); 
+
+    } catch (err) {
+      console.error('Google login failed:', err);
+      setError('Google login failed. Please try again.'); 
     }
   };
 
@@ -52,6 +73,7 @@ function LoginPage() {
     <div>
       <h1>Notice Board Login</h1>
       
+      {/* Email/Pass Form */}
       <div>
         <input 
           type="email" 
@@ -72,16 +94,13 @@ function LoginPage() {
         <button onClick={handleLogin}>Login</button>
       </div>
 
-      {/* 12. Show an error message if one exists */}
       {error && <p style={{ color: 'red' }}>{error}</p>}
-
       <hr /> 
 
-      <div>
-        <a href={GOOGLE_AUTH_URL}>
-          <button>Sign in with Google</button>
-        </a>
-      </div>
+      {/* Google Popup Button */}
+      <button onClick={handleGoogleLogin} style={{ backgroundColor: '#4285F4', color: 'white' }}>
+        Sign in with Google
+      </button>
     </div>
   );
 }
