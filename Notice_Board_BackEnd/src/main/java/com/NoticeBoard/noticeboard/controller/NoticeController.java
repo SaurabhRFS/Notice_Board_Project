@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart; // <-- NEW IMPORT
+import org.springframework.web.bind.annotation.RequestPart; 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,13 +32,10 @@ import java.util.List;
 public class NoticeController {
 
     private final NoticeService noticeService;
-
-    // --- We need the ObjectMapper "translator" now ---
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;   // --- We need the ObjectMapper "translator" now ---
 
     public NoticeController(NoticeService noticeService) {
         this.noticeService = noticeService;
-        
         // --- Create the "translator" and "install" the Date tool ---
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new JavaTimeModule());
@@ -52,7 +49,6 @@ public class NoticeController {
         
         // Catches the "file" part (optional)
         @RequestPart(value = "file", required = false) MultipartFile file,
-        
         Authentication authentication // The user's "wristband"
     ) {
         
@@ -74,7 +70,7 @@ public class NoticeController {
         }
     }
 
-    // --- "Get All Notices" (Smart Filter) Endpoint (Correct) ---
+    // --- "Get All Notices" (Smart Filter) Endpoint ---
     @GetMapping
     public ResponseEntity<List<Notice>> getFilteredNotices(
         @RequestParam(required = false) Long subjectId,
@@ -101,7 +97,6 @@ public class NoticeController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
     }
-
     // --- "Upload File" Endpoint (This is now part of Create Notice) ---
     // We can delete the old /upload endpoint if we want, but it's fine to leave it.
 }
