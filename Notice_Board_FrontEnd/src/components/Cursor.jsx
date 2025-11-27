@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
 // --- Configuration ---
-const PARTICLE_COUNT = 70; // Higher count to handle fast movement without gaps
+const PARTICLE_COUNT = 20; // Higher count to handle fast movement without gaps
 const SPACING = 1;          // Spawn a particle every 3 pixels (Lower = Denser)
 const FADE_SPEED = 0.02;    // How fast they disappear
 const COLORS = ['#4f46e5', '#0ea5e9', '#ec4899', '#8b5cf6']; // Indigo, Sky, Pink, Violet (Vibrant)

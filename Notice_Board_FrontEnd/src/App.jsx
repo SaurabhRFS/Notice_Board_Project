@@ -5,13 +5,13 @@ import LoginPage from './pages/LoginPage.jsx';
 import HomePage from './pages/HomePage.jsx';
 import AuthCallback from './pages/AuthCallback.jsx';
 import AdminPage from './pages/AdminPage.jsx'; // 1. Import our new AdminPage
-import Cursor from './components/Cursor.jsx';
+// import Cursor from './components/Cursor.jsx';
 
 
 function App() {
   return (
-    <div className="cursor-none h-screen w-screen overflow-x-hidden"> {/* Hide default cursor */}
-      <Cursor /> {/* Add the cursor component */}
+    <div className="h-screen w-screen overflow-x-hidden"> {/* Hide default cursor */}
+      {/* <Cursor /> Add the cursor component */}
 
 
       <Routes>

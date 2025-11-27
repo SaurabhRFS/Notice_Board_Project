@@ -4,13 +4,13 @@
 
 /* --- Theme: Luminous Light --- */
 body {
-  cursor: none;
-  background-color: #f8fafc; /* Slate-50 (Very light gray) */
-  color: #1e293b; /* Slate-800 (Dark text for contrast) */
+  /* REMOVED: cursor: none; */
+  background-color: #f8fafc;
+  color: #1e293b;
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
 }
 
-input, textarea, select {
+/* input, textarea, select {
   cursor: text;
-}
+} */
