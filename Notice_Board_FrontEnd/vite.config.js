@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     port: 5173,
     headers: {
-      // This is the MAGIC LINE. It matches Google's security policy.
+      //It matches Google's security policy.
       "Cross-Origin-Opener-Policy": "same-origin-allow-popups"
     }
   }

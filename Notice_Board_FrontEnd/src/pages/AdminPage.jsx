@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { API_BASE_URL } from '../apiConfig'; // <-- 1. ADDED THIS IMPORT
+import { API_BASE_URL } from '../config/apiConfig'; // <-- 1. ADDED THIS IMPORT
 
 function AdminPage() {
   const navigate = useNavigate();

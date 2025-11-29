@@ -4,13 +4,8 @@
 
 /* --- Theme: Luminous Light --- */
 body {
-  /* REMOVED: cursor: none; */
   background-color: #f8fafc;
   color: #1e293b;
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
 }
-
-/* input, textarea, select {
-  cursor: text;
-} */
