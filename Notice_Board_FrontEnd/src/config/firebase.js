@@ -1,8 +1,7 @@
 // src/firebase.js
-
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth"; // <-- 1. Import auth tools
+import { getAuth, GoogleAuthProvider } from "firebase/auth"; // <-- auth tools
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,

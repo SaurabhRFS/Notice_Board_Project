@@ -4,7 +4,7 @@ import { auth, googleProvider } from '../config/firebase';
 import { signInWithPopup } from 'firebase/auth';
 import { Mail, Lock, Zap, Eye, EyeOff } from 'lucide-react';
 
-// --- Imports: Services (The Tools) & Components (The UI) ---
+// --- Imports: Services & Components ---
 import { loginUser, googleLoginUser } from '../services/authService';
 import GlassCard from '../components/GlassCard';
 import FormInput from '../components/FormInput';
@@ -20,57 +20,78 @@ function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // --- 1.Local Login ---
+  // --- 1. Local Login (Service + Robust Error Handling) ---
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
-      const data = await loginUser(email, password);  // Just call the service function
+      // Call the Service
+      const data = await loginUser(email, password);
+      
       localStorage.setItem('token', data.token);
       localStorage.setItem('userRole', data.role);
       navigate('/');
     } catch (err) {
-    if (err.response?.status === 401) {
-      setError("Wrong email or password");
-    } else if (!err.response) {
-      setError("Network error. Check your internet.");
-    } else {
-      setError("Something went wrong. Try again.");
-    }
+      if (err.response) {
+        if (err.response.status === 401) {
+          setError("Wrong email or password.");
+        } else {
+          setError("Something went wrong. Please try again.");
+        }
+      } else {
+        setError("Network error. Check your internet connection.");
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // --- 2.Google Login ---
+  // --- 2. Google Login (Service + Error Codes + Loader) ---
   const handleGoogleLogin = async () => {
+    setError('');
+    setIsLoading(true);
+
     try {
-      // Step A: Get proof from Google (Client Side)
+      // Step A: Client Side
       const result = await signInWithPopup(auth, googleProvider);
       const idToken = await result.user.getIdToken();
 
-      // Step B: Send proof to Backend (Service Side)
+      // Step B: Service Side
       const data = await googleLoginUser(idToken);
 
       localStorage.setItem('token', data.token);
       localStorage.setItem('userRole', data.role);
       navigate('/');
     } catch (err) {
-      setError('Google login failed.');
+      if (err.code === "auth/popup-closed-by-user") {
+        setError("Google login cancelled.");
+      } 
+      else if (err.code === "auth/network-request-failed") {
+        setError("Network error. Check your internet.");
+      }
+      else if (err.response?.status === 500) {
+        setError("Server error during Google login.");
+      } else {
+        setError("Google login failed. Try again.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen w-full bg-slate-50 flex items-center justify-center relative overflow-hidden">
       
+      {/* Background Component */}
       <AnimatedBackground />
 
       <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 z-10 relative md:-mt-24">
         
         {/* Left Column */}
         <div className="flex flex-col justify-center items-start p-8 md:p-16 relative">
+          
           <div className="flex items-center gap-3 mb-6 animate-fade-in-up">
             <div className="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-500/30">
               <Zap size={32} className="text-white" fill="currentColor" />
@@ -90,9 +111,10 @@ function LoginPage() {
           </p>
         </div>
 
-        {/* Right Column (Glass Form) */}
+        {/* Right Column (Glass Form Component) */}
         <div className="flex items-center justify-center p-4 md:p-8">
           <GlassCard>
+
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-slate-800 mb-2">Welcome Back</h2>
               <p className="text-slate-500 text-sm">Please enter your details to sign in.</p>
@@ -128,7 +150,9 @@ function LoginPage() {
                 }
               />
 
-              <PrimaryButton type="submit" isLoading={isLoading}>Sign In</PrimaryButton>
+              <PrimaryButton type="submit" isLoading={isLoading}>
+                Sign In
+              </PrimaryButton>
             </form>
 
             <div className="relative my-6">
@@ -136,7 +160,9 @@ function LoginPage() {
               <div className="relative flex justify-center text-xs"><span className="bg-white/80 backdrop-blur px-2 text-slate-400 uppercase font-bold tracking-widest">Or</span></div>
             </div>
 
-            <GoogleButton onClick={handleGoogleLogin} />
+            {/* Now passing isLoading to GoogleButton */}
+            <GoogleButton onClick={handleGoogleLogin} isLoading={isLoading} />
+
           </GlassCard>
         </div>
       </div>
