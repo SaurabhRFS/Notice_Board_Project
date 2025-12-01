@@ -2,7 +2,10 @@ import React from 'react';
 
 const AnimatedBackground = () => {
   return (
-    <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+    // CHANGED: 'absolute' -> 'fixed'
+    // This makes the background stay in place while content scrolls over it.
+    // We also keep 'h-screen' and 'w-screen' to cover the viewport perfectly.
+    <div className="fixed top-0 left-0 w-screen h-screen overflow-hidden z-0 pointer-events-none">
       
       {/* --- GIANT BLOBS (Normal Speed) --- */}
       
