@@ -1,0 +1,31 @@
+<svg width="240" height="240" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff6bcd">
+        <animate attributeName="stop-color" dur="6s" values="#ff6bcd; #ff8f6b; #6bb6ff; #9d6bff; #ff6bcd" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#6bb6ff">
+        <animate attributeName="stop-color" dur="6s" values="#6bb6ff; #ff6bcd; #ff8f6b; #6bb6ff" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="white" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <circle cx="120" cy="120" r="110" fill="url(#grad)"/>
+
+  <circle cx="120" cy="120" r="105" fill="none" stroke="white" stroke-width="4" stroke-opacity="0.3"/>
+
+  <ellipse cx="120" cy="70" rx="90" ry="50" fill="url(#shine)" opacity="0.7"/>
+
+  <text x="120" y="135" text-anchor="middle" dominant-baseline="middle"
+        font-size="160" font-family="Inter, sans-serif"
+        font-weight="900" fill="black" filter="url(#shadow)">S</text>
+</svg>

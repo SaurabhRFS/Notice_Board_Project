@@ -5,26 +5,37 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
   const [greeting, setGreeting] = useState({ text: 'Hello', theme: 'morning', icon: null });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // --- Time Logic ---
+  // --- 1. Advanced Time Logic ---
   useEffect(() => {
     const hour = new Date().getHours();
+    
     if (hour >= 5 && hour < 12) {
+      // Morning: 5 AM - 11:59 AM
       setGreeting({ 
         text: 'Good Morning', 
         theme: 'morning', 
-        icon: <Sun className="text-amber-500 drop-shadow-sm" size={16} /> 
+        icon: <Sun className="text-amber-500 drop-shadow-sm" size={20} /> 
       });
-    } else if (hour >= 12 && hour < 18) {
+    } else if (hour >= 12 && hour < 17) {
+      // Afternoon: 12 PM - 4:59 PM (Bright Sun, NOT Sunset)
       setGreeting({ 
         text: 'Good Afternoon', 
-        theme: 'evening', 
-        icon: <Sunset className="text-orange-500 drop-shadow-sm" size={16} /> 
+        theme: 'afternoon', 
+        icon: <Sun className="text-orange-500 drop-shadow-sm" size={20} /> 
       });
-    } else {
+    } else if (hour >= 17 && hour < 21) {
+      // Evening: 5 PM - 8:59 PM (Sunset Icon belongs here)
       setGreeting({ 
         text: 'Good Evening', 
+        theme: 'evening', 
+        icon: <Sunset className="text-rose-500 drop-shadow-sm" size={20} /> 
+      });
+    } else {
+      // Night: 9 PM - 4:59 AM (Moon + Good Night)
+      setGreeting({ 
+        text: 'Good Night', 
         theme: 'night', 
-        icon: <Moon className="text-indigo-500 drop-shadow-sm" size={16} fill="currentColor" /> 
+        icon: <Moon className="text-indigo-500 drop-shadow-sm" size={20} fill="currentColor" /> 
       });
     }
   }, []);

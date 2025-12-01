@@ -6,20 +6,9 @@ export default {
   ],
   theme: {
     extend: {
-      animation: {
-        'fade-in-up': 'fadeInUp 0.5s ease-out',
-        'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
-        'shimmer': 'shimmer 2s infinite',
-        
-        // Standard Wanders (For Giant Blobs)
-        'wander-1': 'wander1 15s infinite ease-in-out alternate',
-        'wander-2': 'wander2 20s infinite ease-in-out alternate',
-        'wander-3': 'wander3 25s infinite ease-in-out alternate',
-        
-        // --- NEW: Super Slow Wanders (For Small Blobs) ---
-        'wander-slow-1': 'wander1 35s infinite ease-in-out alternate',
-        'wander-slow-2': 'wander2 40s infinite ease-in-out alternate',
-      },
+      fontFamily: {
+  sans: ['Outfit', 'sans-serif'],
+},
       keyframes: {
         fadeInUp: {
           '0%': { opacity: '0', transform: 'translateY(10px)' },
