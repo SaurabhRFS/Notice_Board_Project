@@ -76,7 +76,7 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-50 flex items-start pt-5 md:items-center md:pt-0 justify-center relative overflow-hidden">
+    <div className="min-h-screen w-full bg-slate-50 flex items-start pt-1 md:items-center md:pt-0 justify-center relative overflow-hidden">
       
       <AnimatedBackground />
 

@@ -170,7 +170,9 @@ const handleFilter = () => {
       await axios.delete(`${API_BASE_URL}/api/notices/${noticeId}`, authConfig);
       handleFilter(); 
     } catch (err) {
-      alert('Failed to delete.');
+      console.error('Error deleting notice:', err);
+      const message = err?.response?.data?.message || err?.message || 'Unknown error';
+      alert(`Failed to delete notice: ${message}`);
     }
   };
 
