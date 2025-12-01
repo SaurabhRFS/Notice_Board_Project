@@ -11,7 +11,7 @@ import AnimatedBackground from '../components/AnimatedBackground';
 import Navbar from '../components/Navbar';
 import GlassCard from '../components/GlassCard';
 import FilterBar from '../components/FilterBar';
-import NoticeCard from '../components/noticeCard'; // <-- Import NoticeCard
+import NoticeCard from '../components/NoticeCard';
 
 function HomePage() {
   const navigate = useNavigate();
