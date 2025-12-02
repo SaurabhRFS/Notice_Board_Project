@@ -1,50 +1,71 @@
 package com.NoticeBoard.noticeboard.service;
 
 import com.NoticeBoard.noticeboard.dto.SubjectRequest;
+import com.NoticeBoard.noticeboard.model.Role;
 import com.NoticeBoard.noticeboard.model.Subject;
+import com.NoticeBoard.noticeboard.model.User;
 import com.NoticeBoard.noticeboard.repository.SubjectRepository;
+import com.NoticeBoard.noticeboard.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.NoticeBoard.noticeboard.repository.UserRepository; // <-- 1. NEW IMPORT
-import com.NoticeBoard.noticeboard.model.User; // <-- 2. NEW IMPORT
-import java.util.List; // <-- 3. NEW IMPORT
+import java.util.List;
 
-@Service // Labels this as our new "Manager"
+@Service
 public class AdminService {
 
-    // 1. Our "Tool" (the "file clerk" for subjects)
     private final SubjectRepository subjectRepository;
-    private final UserRepository userRepository; // <-- 4. ADD NEW TOOL
+    private final UserRepository userRepository;
 
-    // 5. UPDATE CONSTRUCTOR
     public AdminService(SubjectRepository subjectRepository, UserRepository userRepository) {
         this.subjectRepository = subjectRepository;
-        this.userRepository = userRepository; // <-- 6. SAVE NEW TOOL
+        this.userRepository = userRepository;
     }
 
-    // 3. The "Create Subject" Logic
+    // --- 1. Create Subject ---
     @Transactional
     public Subject createSubject(SubjectRequest subjectRequest) {
-        
-        // We can add a check here later to see if the subject already exists
-        
-        // A. Create the new Subject entity
         Subject newSubject = new Subject();
-        
-        // B. Copy data from the "bucket" (DTO) to our entity
         newSubject.setName(subjectRequest.getName());
         newSubject.setBranch(subjectRequest.getBranch());
         newSubject.setSemester(subjectRequest.getSemester());
-
-        // C. Save the new subject to the database
         return subjectRepository.save(newSubject);
     }
 
+    // --- 2. Get All Users ---
     @Transactional(readOnly = true)
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    // We will add the "promoteUser" logic here later
+    // --- 3. Promote User Logic ---
+    @Transactional
+    public void promoteUserToTeacher(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+        user.setRole(Role.ROLE_TEACHER);
+        userRepository.save(user);
+    }
+
+    // --- 4. NEW: Update Subject ---
+    @Transactional
+    public Subject updateSubject(Long subjectId, SubjectRequest request) {
+        Subject subject = subjectRepository.findById(subjectId)
+            .orElseThrow(() -> new RuntimeException("Subject not found"));
+        
+        subject.setName(request.getName());
+        subject.setBranch(request.getBranch());
+        subject.setSemester(request.getSemester());
+        
+        return subjectRepository.save(subject);
+    }
+
+    // --- 5. NEW: Delete Subject ---
+    @Transactional
+    public void deleteSubject(Long subjectId) {
+        if (!subjectRepository.existsById(subjectId)) {
+            throw new RuntimeException("Subject not found");
+        }
+        subjectRepository.deleteById(subjectId);
+    }
 }

@@ -1,168 +1,127 @@
-// src/pages/AdminPage.jsx
-
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { API_BASE_URL } from '../config/apiConfig'; // <-- 1. ADDED THIS IMPORT
+import { Menu, X } from 'lucide-react'; // <-- 1. NEW IMPORTS
+import AnimatedBackground from '../components/AnimatedBackground';
+import AdminSidebar from '../components/AdminSidebar';
+import UserManagement from '../components/UserManagement'; 
+import SubjectManagement from '../components/SubjectManagement';
 
 function AdminPage() {
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
-
-  // --- "Memory boxes" for the new subject form ---
-  const [subjectName, setSubjectName] = useState('');
-  const [subjectBranch, setSubjectBranch] = useState('');
-  const [subjectSemester, setSubjectSemester] = useState('');
-  const [error, setError] = useState('');
-
-  // --- "Memory boxes" for the dropdowns ---
-  const [branches, setBranches] = useState([]);
-  const [semesters, setSemesters] = useState([]);
-
-  // --- "Memory box" for the user list ---
-  const [users, setUsers] = useState([]);
-
-  // --- "On Load" function (useEffect) ---
+  
+  // --- STATE ---
+  const [activeTab, setActiveTab] = useState('users'); // 'users' or 'subjects'
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // <-- 2. NEW STATE
+  
+  // Auth Check
   useEffect(() => {
-    if (!token) {
-      navigate('/login');
-      return;
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('userRole');
+    if (!token || role !== 'ROLE_ADMIN') {
+      navigate('/'); // Kick non-admins out
     }
-    const authConfig = { headers: { 'Authorization': `Bearer ${token}` } };
-    
-    // --- 2. RE-WIRED THESE URLS ---
-    axios.get(`${API_BASE_URL}/api/data/branches`, authConfig).then(res => setBranches(res.data));
-    axios.get(`${API_BASE_URL}/api/data/semesters`, authConfig).then(res => setSemesters(res.data));
+  }, [navigate]);
 
-    // Load the list of all users
-    fetchUsers();
-  }, [token, navigate]);
-
-  // --- Function to get all users ---
-  const fetchUsers = () => {
-    const authConfig = { headers: { 'Authorization': `Bearer ${token}` } };
-    // --- 3. RE-WIRED THIS URL ---
-    axios.get(`${API_BASE_URL}/api/admin/users`, authConfig)
-      .then(res => setUsers(res.data))
-      .catch(err => console.error("Could not fetch users", err));
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userRole');
+    navigate('/login');
   };
 
-  // --- "Create Subject" button logic ---
-  const handleCreateSubject = async () => {
-    setError('');
-    const authConfig = { headers: { 'Authorization': `Bearer ${token}` } };
-    const subjectData = {
-      name: subjectName,
-      branch: subjectBranch,
-      semester: subjectSemester
-    };
-    try {
-      // --- 4. RE-WIRED THIS URL ---
-      await axios.post(`${API_BASE_URL}/api/admin/subjects`, subjectData, authConfig);
-      alert('Subject created successfully!');
-      navigate('/'); // Redirect back to the Home page
-    } catch (err) {
-      console.error('Error creating subject:', err);
-      setError('Failed to create subject. Are you an Admin?');
-    }
-  };
-
-  // --- "PROMOTE USER" LOGIC ---
-  const handlePromoteUser = async (userId) => {
-    if (!window.confirm('Are you sure you want to promote this user to TEACHER?')) {
-      return;
-    }
-    
-    const authConfig = { headers: { 'Authorization': `Bearer ${token}` } };
-
-    try {
-      // --- 5. RE-WIRED THIS URL ---
-      await axios.put(`${API_BASE_URL}/api/admin/users/${userId}/promote`, {}, authConfig);
-      
-      // Success!
-      alert('User promoted to Teacher!');
-      fetchUsers(); // Refresh the user list to show the new role
-    
-    } catch (err) {
-      console.error('Error promoting user:', err);
-      alert('Failed to promote user.');
-    }
+  // Helper to close menu when a tab is selected (mobile UX)
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setIsMobileMenuOpen(false);
   };
 
   return (
-    <div>
-      <button onClick={() => navigate('/')}>Back to Home</button>
-      <hr />
-      <h1>Admin Panel</h1>
+    <div className="flex min-h-screen w-full bg-slate-50 relative overflow-hidden">
+      
+      <AnimatedBackground />
 
-      {/* --- "Create Subject" Form --- */}
-      <div style={{ background: '#eee', padding: '10px' }}>
-        <h3>Create New Subject</h3>
-        <div>
-          <input 
-            type="text" 
-            placeholder="Subject Name (e.g., DSA)"
-            value={subjectName}
-            onChange={(e) => setSubjectName(e.target.value)}
-          />
-        </div>
-        <div>
-          <select value={subjectBranch} onChange={(e) => setSubjectBranch(e.target.value)}>
-            <option value="">Select Branch...</option>
-            {branches.map(branch => (
-              <option key={branch} value={branch}>{branch}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <select value={subjectSemester} onChange={(e) => setSubjectSemester(e.target.value)}>
-            <option value="">Select Semester...</option>
-            {semesters.map(sem => (
-              <option key={sem} value={sem}>{sem}</option>
-            ))}
-          </select>
-        </div>
-        <button onClick={handleCreateSubject} style={{ marginTop: '10px' }}>
-          Create Subject
+      {/* --- 3. MOBILE HEADER (Visible only on small screens) --- */}
+      <div className="md:hidden fixed top-0 left-0 w-full z-50 bg-white/10 backdrop-blur-md border-b border-white/20 p-4 flex items-center justify-between">
+        <h1 className="text-xl font-black text-slate-800 tracking-tighter">
+          Admin<span className="text-blue-600">Panel</span>
+        </h1>
+        <button 
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="p-2 bg-white/40 rounded-full text-slate-700 shadow-sm"
+        >
+          <Menu size={20} />
         </button>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
       </div>
 
-      <hr />
+      {/* --- 4. MOBILE DRAWER (Overlay + Sidebar) --- */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-[60] md:hidden">
+          {/* Dark Backdrop */}
+          <div 
+            className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"
+            onClick={() => setIsMobileMenuOpen(false)}
+          ></div>
+          
+          {/* Slide-out Sidebar */}
+          <div className="absolute top-0 left-0 w-3/4 max-w-xs h-full bg-white shadow-2xl animate-fade-in-up">
+             <div className="absolute top-4 right-4 z-50">
+               <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-400 hover:text-red-500">
+                 <X size={24} />
+               </button>
+             </div>
+             {/* Reuse the Sidebar Component */}
+             <AdminSidebar 
+               activeTab={activeTab} 
+               setActiveTab={handleTabChange} 
+               onLogout={handleLogout} 
+               onHome={() => navigate('/')} 
+             />
+          </div>
+        </div>
+      )}
 
-      {/* --- "USER MANAGEMENT" SECTION --- */}
-      <div style={{ background: '#f9f9f9', padding: '10px', marginTop: '20px' }}>
-        <h3>User Management</h3>
-        <table border="1" style={{ width: '100%' }}>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Username</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(user => (
-              <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.username}</td>
-                <td>{user.email}</td>
-                <td>{user.role}</td>
-                <td>
-                  {/* Only show the button if they are a STUDENT */}
-                  {user.role === 'ROLE_STUDENT' && (
-                    <button onClick={() => handlePromoteUser(user.id)}>
-                      Promote to Teacher
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* 5. DESKTOP SIDEBAR (Hidden on mobile) */}
+      <div className="relative z-20 hidden md:block">
+        <AdminSidebar 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          onLogout={handleLogout}
+          onHome={() => navigate('/')}
+        />
       </div>
+
+      {/* 6. MAIN CONTENT AREA (Adjusted padding for mobile header) */}
+      <div className="flex-1 relative z-10 h-screen overflow-y-auto pt-20 md:pt-0">
+        <div className="p-6 md:p-12 max-w-7xl mx-auto">
+          
+          {/* Header */}
+          <div className="mb-8">
+            <h2 className="text-2xl md:text-3xl font-black text-slate-800">
+              {activeTab === 'users' ? 'User Management' : 'Subject Management'}
+            </h2>
+            <p className="text-sm md:text-base text-slate-500 font-medium mt-1">
+              {activeTab === 'users' 
+                ? 'Manage roles, promote students, and oversee accounts.' 
+                : 'Create new subjects and assign them to branches.'}
+            </p>
+          </div>
+
+          {/* DYNAMIC CONTENT SWITCHER */}
+          <div className="animate-fade-in-up">
+            {activeTab === 'users' ? (
+              
+              // --- PLACEHOLDER: USER TAB ---
+              <UserManagement />
+
+            ) : (
+              // --- PLACEHOLDER: SUBJECT TAB ---
+              <SubjectManagement />
+
+            )}
+          </div>
+
+        </div>
+      </div>
+
     </div>
   );
 }
