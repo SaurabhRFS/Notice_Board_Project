@@ -21,6 +21,8 @@ export default {
         'wander-3': 'wander3 25s infinite ease-in-out alternate',
         'wander-slow-1': 'wander1 35s infinite ease-in-out alternate',
         'wander-slow-2': 'wander2 40s infinite ease-in-out alternate',
+
+        'shine': 'shine 3s infinite',
       },
       // 3. Restore Keyframes (The "Instructions" for movement)
       keyframes: {

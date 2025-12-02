@@ -5,6 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.ArrayList; // <-- IMPORT
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty; // <--- Add this import
 
 @Data
 @Entity
@@ -32,7 +33,8 @@ public class Notice {
     private LocalDateTime expiresAt;
 
     @Column(name = "is_pinned", nullable = false)
-    private boolean isPinned = false; 
+    @JsonProperty("isPinned") // <--- This forces the name to stay "isPinned"
+    private boolean isPinned = false;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "target_branch", nullable = true)
