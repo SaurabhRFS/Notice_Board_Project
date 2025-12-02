@@ -12,7 +12,7 @@ import Navbar from '../components/Navbar';
 import GlassCard from '../components/GlassCard';
 import FilterBar from '../components/FilterBar';
 import NoticeCard from '../components/NoticeCard';
-import DeleteConfirmModal from '../components/DeleteConfirmModal'; // Ensure you created this file!
+import DeleteConfirmModal from '../components/DeleteConfirmModal';
 
 function HomePage() {
   const navigate = useNavigate();
@@ -180,19 +180,16 @@ function HomePage() {
     }
   };
 
-  // --- DELETE LOGIC (Two Steps) ---
-  
-  // Step 1: Open Modal
+  // --- DELETE LOGIC ---
   const handleDeleteClick = (noticeId) => {
     setNoticeToDelete(noticeId);
     setIsDeleteModalOpen(true);
   };
 
-  // Step 2: Actually Delete (Triggered by Modal)
   const confirmDelete = async () => {
     if (!noticeToDelete) return;
     
-    setIsDeleting(true); // START LOADER
+    setIsDeleting(true); 
     const authConfig = { headers: { 'Authorization': `Bearer ${token}` } };
     
     try {
@@ -206,9 +203,29 @@ function HomePage() {
       console.error('Error deleting notice:', err);
       alert('Failed to delete notice.');
     } finally {
-      setIsDeleting(false); // STOP LOADER
+      setIsDeleting(false); 
     }
   };
+
+  // --- SMART SUBJECT FILTERING LOGIC ---
+  // This filters the dropdown list based on what Branch/Semester you picked
+  const filteredSubjects = subjects.filter(subject => {
+    // 1. Check Branch (If empty, show all. Otherwise match.)
+    const branchMatch = !selectedBranch || subject.branch === selectedBranch;
+
+    // 2. Check Semester
+    const semMatch = !selectedSemester || subject.semester === selectedSemester;
+
+    return branchMatch && semMatch;
+  });
+
+  // --- Auto-Clear Subject when Branch/Sem changes ---
+  // If the currently selected subject doesn't exist in the NEW filtered list, clear it.
+  useEffect(() => {
+    if (selectedSubject && !filteredSubjects.find(s => s.id === parseInt(selectedSubject))) {
+      setSelectedSubject('');
+    }
+  }, [selectedBranch, selectedSemester, filteredSubjects, selectedSubject]);
 
   return (
     <div className="min-h-screen w-full bg-slate-50 relative overflow-x-hidden">
@@ -226,10 +243,11 @@ function HomePage() {
       <div className="relative z-10 pt-24 md:pt-28 pb-12 px-4 max-w-7xl mx-auto">
         
         {/* --- FILTER BAR --- */}
+        {/* We pass 'filteredSubjects' instead of 'subjects' */}
         <FilterBar 
           branches={branches}
           semesters={semesters}
-          subjects={subjects}
+          subjects={filteredSubjects} 
           selectedBranch={selectedBranch}
           setSelectedBranch={setSelectedBranch}
           selectedSemester={selectedSemester}

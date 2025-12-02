@@ -7,25 +7,34 @@ const FilterBar = ({
   selectedSemester, setSelectedSemester,
   selectedSubject, setSelectedSubject,
   onApply,
-  isLoading // <-- 1. NEW PROP
+  isLoading 
 }) => {
   return (
     // --- MAIN DECK ---
-    <div className="relative mx-auto max-w-8xl mb-10 rounded-full border border-white/40 bg-white/20 backdrop-blur-xl shadow-xl px-2 py-2 md:px-4 md:py-3 transition-all hover:bg-white/25">
+    <div className="relative mx-auto max-w-7xl mb-10 rounded-full border border-white/40 bg-white/20 backdrop-blur-xl shadow-xl px-2 py-2 md:px-4 md:py-3 transition-all hover:bg-white/25">
       
       <div className="flex items-center justify-between gap-1 md:gap-4 w-full">
         
-        {/* 1. FILTER ICON */}
-        <div className="flex items-center justify-center shrink-0">
-          <div className="p-2 md:p-2 bg-white/30 rounded-full border border-white/50 shadow-sm text-slate-700">
-            <ListFilter size={16} className="md:w-[18px] md:h-[18px]" />
+        {/* 1. FILTER INDICATOR (Updated for Mobile) */}
+        <div className="flex items-center justify-center shrink-0 pl-1 md:pl-0">
+          
+          {/* Mobile: Just a flat, subtle icon. No border/bg means "Not a button" */}
+          <div className="md:hidden text-slate-400/80 pr-1">
+            <ListFilter size={18} />
           </div>
-          <span className="hidden md:block font-black text-xs text-slate-600 tracking-[0.15em] uppercase opacity-80 ml-3">
-            Filter By
-          </span>
+
+          {/* Desktop: The original fancy capsule design */}
+          <div className="hidden md:flex items-center">
+            <div className="p-2 bg-white/30 rounded-full border border-white/50 shadow-sm text-slate-700">
+              <ListFilter size={16} />
+            </div>
+            <span className="font-black text-xs text-slate-600 tracking-[0.15em] uppercase opacity-80 ml-3">
+              Filter By
+            </span>
+          </div>
         </div>
 
-        {/* Divider */}
+        {/* Divider (Desktop Only) */}
         <div className="hidden md:block w-px h-8 bg-gradient-to-b from-transparent via-white/50 to-transparent"></div>
 
         {/* 2. THE 3 SUB-CAPSULES (Dropdowns) */}
@@ -37,7 +46,7 @@ const FilterBar = ({
             <select 
               value={selectedBranch} 
               onChange={(e) => setSelectedBranch(e.target.value)} 
-              disabled={isLoading} // Disable while loading
+              disabled={isLoading}
               className="w-full pl-6 pr-1 py-2 md:pl-9 md:pr-4 md:py-2.5 rounded-xl bg-white/40 border-[2px] border-white/50 text-[10px] md:text-sm font-bold text-slate-700 focus:bg-white/80 focus:ring-2 focus:ring-blue-200 outline-none appearance-none cursor-pointer transition-all hover:bg-white/60 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6)] truncate disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">Branch</option>
@@ -69,15 +78,19 @@ const FilterBar = ({
               className="w-full pl-6 pr-1 py-2 md:pl-9 md:pr-4 md:py-2.5 rounded-xl bg-white/40 border-[2px] border-white/50 text-[10px] md:text-sm font-bold text-slate-700 focus:bg-white/80 focus:ring-2 focus:ring-blue-200 outline-none appearance-none cursor-pointer transition-all hover:bg-white/60 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6)] truncate disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">Sub</option>
-              {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              {subjects.length === 0 && (selectedBranch || selectedSemester) ? (
+                <option value="" disabled>No Subjects</option>
+              ) : (
+                subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)
+              )}
             </select>
           </div>
         </div>
 
-        {/* 3. SEARCH BUTTON (Loading Logic) */}
+        {/* 3. SEARCH BUTTON */}
         <button 
           onClick={onApply} 
-          disabled={isLoading} // Prevent double clicks
+          disabled={isLoading} 
           className="
             group relative shrink-0
             p-2 md:px-6 md:py-2.5 rounded-full 
@@ -91,17 +104,14 @@ const FilterBar = ({
             disabled:opacity-70 disabled:cursor-wait
           "
         >
-          {/* Inner Glow */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           
           {isLoading ? (
-            // LOADING STATE
             <>
               <Loader2 size={18} className="relative z-10 animate-spin text-blue-600" />
               <span className="hidden md:block relative z-10 uppercase tracking-wide text-xs">Loading...</span>
             </>
           ) : (
-            // NORMAL STATE
             <>
               <Search size={18} className="relative z-10" />
               <span className="hidden md:block relative z-10 uppercase tracking-wide text-xs">Search</span>
