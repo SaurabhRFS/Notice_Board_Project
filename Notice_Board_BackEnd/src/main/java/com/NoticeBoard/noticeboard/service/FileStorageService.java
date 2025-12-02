@@ -20,38 +20,64 @@ public class FileStorageService {
     }
 
 
-
-
     public String uploadFile(MultipartFile file) throws IOException {
+        
+        // 1. Simple UUID (No extension logic, to avoid "double extension" errors)
         String publicId = UUID.randomUUID().toString();
         
-        // 1. Determine Content Type
-        String contentType = file.getContentType();
-        String resourceType = "auto"; 
-
-        // 2. FORCE "raw" for PDFs/Docs to ensure they are downloadable
-        if (contentType != null && (contentType.equals("application/pdf") 
-            || contentType.contains("document") 
-            || contentType.contains("msword") 
-            || contentType.contains("zip"))) {
-            resourceType = "raw";
-        }
-
-        // 3. Configure parameters
+        // 2. Force Raw (To ensure it uploads without "Image" errors)
         Map params = ObjectUtils.asMap(
             "public_id", publicId,
-            "resource_type", resourceType
+            "resource_type", "raw" 
         );
 
-        // --- THE FIX: Use 'uploadLarge' and 'getInputStream' ---
-        // 'uploadLarge' handles chunking automatically for files > 10MB.
-        // 'getInputStream()' streams data instead of loading 25MB into RAM at once.
-        Map uploadResult = cloudinary.uploader().uploadLarge(file.getInputStream(), params);
+        // 3. Standard Upload
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
 
         return (String) uploadResult.get("secure_url");
     }
 
 
+    // --- OLD CODE (BEFORE THE FIX) ---
+    // public String uploadFile(MultipartFile file) throws IOException {
+        
+    //     String publicId = UUID.randomUUID().toString();
+    //     String originalFilename = file.getOriginalFilename();
+    //     String contentType = file.getContentType();
+        
+    //     // Default to "auto" for Images/Videos (Cloudinary handles these well)
+    //     String resourceType = "auto"; 
+
+    //     // --- THE CRITICAL FIX FOR PDFS ---
+    //     // 1. Force "raw" for PDFs. This prevents Cloudinary from processing/corrupting them.
+    //     if (contentType != null && (
+    //            contentType.equals("application/pdf") 
+    //         || contentType.contains("msword") 
+    //         || contentType.contains("document")
+    //         || contentType.contains("zip"))) {
+            
+    //         resourceType = "raw";
+            
+    //         // 2. MANUALLY APPEND EXTENSION
+    //         // For "raw" files, we MUST add the extension to the ID, 
+    //         // otherwise Cloudinary saves it with no extension (leading to the "Chinese Text" issue).
+    //         if (originalFilename != null && originalFilename.lastIndexOf(".") > 0) {
+    //             String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+    //             publicId = publicId + extension;
+    //         }
+    //     }
+
+    //     Map params = ObjectUtils.asMap(
+    //         "public_id", publicId,
+    //         "resource_type", resourceType
+    //     );
+
+    //     // 3. Use standard 'upload' (NOT uploadLarge)
+    //     // This is the most stable method for files under 10MB.
+    //     Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
+
+    //     return (String) uploadResult.get("secure_url");
+    // }
 
 }
 

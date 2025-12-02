@@ -220,20 +220,26 @@ const NoticeCard = ({ notice, userRole, onDelete }) => {
           </div>
         )}
 
+
+
+
         {/* --- D. DOCUMENT STACK (PDFs) --- */}
+       {/* --- D. DOCUMENT STACK (PDFs) --- */}
         {documents.length > 0 && (
           <div className="flex flex-col gap-2 mb-4 relative z-10">
             {documents.map((url, idx) => (
               <a 
                 key={idx}
-                href={url}
-                target="_blank"
-                rel="noreferrer"
+                // THE FIX: Add '?fl_attachment' to force download
+                // This bypasses the buggy browser preview and saves the file directly.
+                href={`${url}?fl_attachment`} 
+                
+                target="_blank" 
+                rel="noopener noreferrer"
                 className="flex items-center justify-between p-3 rounded-xl bg-white/60 border border-white/60 hover:bg-blue-50/80 hover:border-blue-200 hover:scale-[1.01] transition-all group/file shadow-sm"
               >
                 <div className="flex items-center gap-3 overflow-hidden">
                   <div className="p-2 bg-red-100 text-red-500 rounded-lg">
-                    {/* Icon based on file type */}
                     {getFileType(url) === 'pdf' ? <FileText size={18} /> : <File size={18} />}
                   </div>
                   <div className="flex flex-col min-w-0">
@@ -253,6 +259,10 @@ const NoticeCard = ({ notice, userRole, onDelete }) => {
             ))}
           </div>
         )}
+
+
+
+
 
         {/* --- E. FOOTER ACTIONS --- */}
         {(userRole === 'ROLE_TEACHER' || userRole === 'ROLE_ADMIN') && (

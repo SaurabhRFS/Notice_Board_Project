@@ -300,11 +300,20 @@ function HomePage() {
 
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-500 uppercase ml-1">Related Subject</label>
-                    <select value={newNoticeSubject} onChange={(e) => setNewNoticeSubject(e.target.value)} className="w-full p-3 bg-white/50 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/50">
+                    <select 
+                      value={newNoticeSubject} 
+                      onChange={(e) => setNewNoticeSubject(e.target.value)} 
+                      className="w-full p-3 bg-white/50 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/50"
+                    >
                       <option value="">None (General Notice)</option>
-                      {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                      {/* SMART FILTER: Only show subjects matching the selected branch */}
+                      {subjects
+                        .filter(s => newNoticeBranch === 'GENERAL' || s.branch === newNoticeBranch)
+                        .map(s => <option key={s.id} value={s.id}>{s.name}</option>)
+                      }
                     </select>
                   </div>
+
                 </div>
 
                 {/* Semesters & Date */}
