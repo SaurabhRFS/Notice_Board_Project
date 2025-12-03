@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage.jsx';
 import AuthCallback from './pages/AuthCallback.jsx';
 import AdminPage from './pages/AdminPage.jsx'; // 1. Import our new AdminPage
 // import Cursor from './components/Cursor.jsx';
+import NotFoundPage from './pages/NotFoundPage.jsx';
 
 function App() {
   return (
@@ -23,6 +24,8 @@ function App() {
 
         {/* 2. THIS IS "ADMIN" ROUTE */}
         <Route path="/admin" element={<AdminPage />} />
+
+        <Route path="*" element={<NotFoundPage />} />
         
       </Routes>
     </div>
