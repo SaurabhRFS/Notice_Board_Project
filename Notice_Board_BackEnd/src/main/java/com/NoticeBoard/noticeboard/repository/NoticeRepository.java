@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
-    // --- THIS IS THE NEW "SMART FILTER" QUERY ---
+    // --- THE NEW "SMART FILTER" QUERY ---
     @Query(
         value = "SELECT n FROM Notice n " +
                 "LEFT JOIN n.targetSemesters s " +

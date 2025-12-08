@@ -51,6 +51,7 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!-- This jar file is the PostgreSQL Driver -->
 		<dependency>
     		<groupId>org.postgresql</groupId>
    			<artifactId>postgresql</artifactId>

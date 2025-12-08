@@ -1,7 +1,7 @@
 package com.NoticeBoard.noticeboard.dto;
 
 import lombok.Data;
-
+// We use Lombok to reduce boilerplate code {like getters/setters}
 @Data
 public class AuthResponse {
     

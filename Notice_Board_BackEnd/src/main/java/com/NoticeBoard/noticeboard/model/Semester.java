@@ -1,7 +1,6 @@
 package com.NoticeBoard.noticeboard.model;
 
 public enum Semester {
-    // You can adjust these based on your college's semester numbering
     SEM_1,
     SEM_2,
     SEM_3,

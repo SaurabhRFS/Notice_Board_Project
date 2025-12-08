@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, googleProvider } from '../config/firebase';
 import { signInWithPopup } from 'firebase/auth';
@@ -19,6 +19,15 @@ function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  // --- FIX 1: Auto-Redirect if already logged in ---
+  // If a user presses "Back" to get here, this kicks them forward immediately.
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/', { replace: true });
+    }
+  }, [navigate]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -28,7 +37,11 @@ function LoginPage() {
       const data = await loginUser(email, password);
       localStorage.setItem('token', data.token);
       localStorage.setItem('userRole', data.role);
-      navigate('/');
+      
+      // --- FIX 2: Use 'replace: true' ---
+      // This deletes the Login Page from history so "Back" closes the app (or goes to Google)
+      navigate('/', { replace: true });
+      
     } catch (err) {
       if (err.response?.status === 401) {
         setError("Wrong email or password");
@@ -42,22 +55,21 @@ function LoginPage() {
     }
   };
 
-  //--- 2. Google Login (Service + Error Codes + Loader) ---
   const handleGoogleLogin = async () => {
     setError('');
     setIsLoading(true);
 
     try {
-      // Step A: Client Side
       const result = await signInWithPopup(auth, googleProvider);
       const idToken = await result.user.getIdToken();
-
-      // Step B: Service Side
       const data = await googleLoginUser(idToken);
 
       localStorage.setItem('token', data.token);
       localStorage.setItem('userRole', data.role);
-      navigate('/');
+      
+      // --- FIX 2: Use 'replace: true' here too ---
+      navigate('/', { replace: true });
+      
     } catch (err) {
       if (err.code === "auth/popup-closed-by-user") {
         setError("Google login cancelled.");
@@ -82,11 +94,9 @@ function LoginPage() {
 
       <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 z-10 relative md:-mt-24">
         
-        {/* Left Column - COMPACTED FOR MOBILE */}
-        {/* Changed p-8 to p-6 for mobile */}
+        {/* Left Column */}
         <div className="flex flex-col justify-center items-start p-6 md:p-16 relative">
           
-          {/* Logo: Reduced bottom margin (mb-2 vs mb-6) */}
           <div className="flex items-center gap-3 mb-2 md:mb-6 animate-fade-in-up">
             <div className="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-500/30">
               <Zap size={28} className="text-white md:w-8 md:h-8" fill="currentColor" />
@@ -94,8 +104,6 @@ function LoginPage() {
             <span className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">CampusNotice</span>
           </div>
 
-          {/* Heading: text-3xl (Mobile) vs text-5xl (Desktop) */}
-          {/* Leading: leading-none (Mobile) to squash gaps */}
           <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 leading-none md:leading-tight mb-3 md:mb-6 animate-fade-in-up [animation-delay:100ms]">
             Stay updated with <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-purple-600">
@@ -103,15 +111,12 @@ function LoginPage() {
             </span>
           </h1>
           
-          {/* Paragraph: text-sm (Mobile) vs text-lg (Desktop) */}
-          {/* Leading: leading-normal (Mobile) for tighter text block */}
           <p className="text-sm md:text-lg text-slate-600 max-w-md animate-fade-in-up [animation-delay:200ms] font-medium leading-normal md:leading-relaxed">
             Connect to the grid. Get real-time announcements, grades, and schedules in one synchronized hub.
           </p>
         </div>
 
         {/* Right Column (Glass Form) */}
-        {/* Reduced padding p-4 on mobile */}
         <div className="flex items-center justify-center p-4 md:p-8">
           <GlassCard>
             <div className="mb-8">

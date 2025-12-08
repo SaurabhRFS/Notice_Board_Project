@@ -20,7 +20,7 @@ function AuthCallback() {
       localStorage.setItem('userRole', role);
       
       // 5. Redirect to the home page!
-      navigate('/');
+      navigate('/', { replace: true });
     } else {
       // If something went wrong, send back to login
       navigate('/login');

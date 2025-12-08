@@ -35,7 +35,6 @@ public class DataInitializer implements CommandLineRunner {
         
         // --- 1. ADMIN ---
         if (userRepository.findByEmail("admin@noticeboard.com").isEmpty()) {
-            System.out.println("Creating ADMIN...");
             User admin = new User();
             admin.setEmail("admin@noticeboard.com");
             admin.setUsername("Admin");
@@ -47,7 +46,6 @@ public class DataInitializer implements CommandLineRunner {
 
         // --- 2. TEACHER ---
         if (userRepository.findByEmail("teacher@noticeboard.com").isEmpty()) {
-            System.out.println("Creating TEACHER...");
             User teacher = new User();
             teacher.setEmail("teacher@noticeboard.com");
             teacher.setUsername("Teacher");
@@ -59,7 +57,6 @@ public class DataInitializer implements CommandLineRunner {
 
         // --- 3. STUDENT ---
         if (userRepository.findByEmail("student@noticeboard.com").isEmpty()) {
-            System.out.println("Creating STUDENT...");
             User student = new User();
             student.setEmail("student@noticeboard.com");
             student.setUsername("Student");
