@@ -45,8 +45,6 @@ function LoginPage() {
     } catch (err) {
       if (err.response?.status === 401) {
         setError("Wrong email or password");
-      } else if (!err.response) {
-        setError("Network error. Check your internet.");
       } else {
         setError("Something went wrong. Try again.");
       }

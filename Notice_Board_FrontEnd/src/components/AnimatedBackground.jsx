@@ -27,7 +27,6 @@ const AnimatedBackground = () => {
       <div className="absolute bottom-[10%] right-[40%] w-80 h-80 bg-teal-200 rounded-full 
                       mix-blend-multiply filter blur-xl opacity-70 animate-wander-1 animation-delay-1500"></div>
 
-
       {/* --- SMALL BLOBS (Even Sharper Blur) --- */}
 
       <div className="absolute top-[20%] right-[20%] w-32 h-32 bg-red-300 rounded-full 
