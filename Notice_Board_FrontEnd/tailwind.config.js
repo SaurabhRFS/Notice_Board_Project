@@ -11,7 +11,7 @@ export default {
         sans: ['Outfit', 'sans-serif'],
         display: ['"Tenor Sans"', 'sans-serif'],
       },
-      // 2. Restore Animations
+      // 2. Animations (Your Requested List)
       animation: {
         'fade-in-up': 'fadeInUp 0.5s ease-out',
         'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
@@ -21,13 +21,12 @@ export default {
         'wander-3': 'wander3 25s infinite ease-in-out alternate',
         'wander-slow-1': 'wander1 35s infinite ease-in-out alternate',
         'wander-slow-2': 'wander2 40s infinite ease-in-out alternate',
-
         'shine': 'shine 3s infinite',
       },
-      // 3. Restore Keyframes (The "Instructions" for movement)
+      // 3. Keyframes (The "Instructions")
       keyframes: {
         fadeInUp: {
-          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '0%': { opacity: '0', transform: 'translateY(40px)' }, // <--- CHANGED to 40px (The Deep Drop)
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
         shake: {
@@ -38,6 +37,9 @@ export default {
         },
         shimmer: {
           '100%': { transform: 'translateX(100%)' },
+        },
+        shine: {
+          '100%': { left: '125%' }, // <--- ADDED (Makes the shine effect actually move)
         },
         wander1: {
           '0%': { transform: 'translate(0, 0) scale(1)' },

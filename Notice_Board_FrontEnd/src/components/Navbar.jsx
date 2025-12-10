@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types'; // 1. Import PropTypes
 import {
   LogOut, Shield, PenTool, Menu, X, Sun, Moon, Sunset,
   Trophy, FileQuestion, Book, Calendar
 } from 'lucide-react';
-// IMPORT YOUR NEW COMPONENT
 import GlassMenuCard from './GlassMenuCard';
 
 const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) => {
@@ -37,7 +37,6 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
       bg: 'bg-blue-50',
       comingSoon: true
     },
-    // Bus Tracker REMOVED as requested
     {
       id: 'calendar',
       label: 'Academic Calendar',
@@ -76,7 +75,6 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
       window.open(item.link, '_blank');
       setIsMenuOpen(false);
     }
-    // If comingSoon, we do nothing. The button is disabled in the component anyway.
   };
 
   return (
@@ -145,11 +143,22 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
         </div>
       </nav>
 
-      {/* --- THE DRAWER --- */}
-      <div
-        className={`fixed inset-0 z-[60] bg-slate-900/10 backdrop-blur-[4px] transition-opacity duration-500 ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+      {/* --- PREMIUM DRAWER --- */}
+
+      {/* 2. Backdrop Fix (Using Button) */}
+      <button
+        type="button"
+        className={`
+          fixed inset-0 z-[60] 
+          bg-slate-900/10 backdrop-blur-[4px] 
+          transition-opacity duration-500 
+          w-full h-full border-none cursor-default
+          ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+        `}
         onClick={() => setIsMenuOpen(false)}
-      ></div>
+        tabIndex="-1"
+        aria-label="Close Menu"
+      />
 
       <div className={`
         fixed top-0 left-0 h-full z-[70] 
@@ -165,7 +174,6 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
             <div>
-              {/* BIG BLACK TEXT as requested */}
               <h2 className="text-3xl font-black text-slate-900 leading-tight">Main Menu</h2>
               <span className="text-xs font-bold text-slate-500 tracking-wider uppercase mt-1 block">Campus Utilities</span>
             </div>
@@ -174,7 +182,7 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
             </button>
           </div>
 
-          {/* Feature List (Using Component) */}
+          {/* Feature List */}
           <div className="space-y-3 mb-8">
             {menuItems.map((item) => (
               <GlassMenuCard
@@ -186,17 +194,15 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
           </div>
 
           {/* Footer Actions */}
-          <div className="mt-auto pt-6 border-t border-white/30 space-y-3">
+          <div className="mt-auto pt-6 border-t border-white/30 space-y-4">
             {(userRole === 'ROLE_TEACHER' || userRole === 'ROLE_ADMIN') && (
               <button
                 onClick={() => { onCreateClick(); setIsMenuOpen(false); }}
-                className="w-full p-4 rounded-2xl /* The Green Tint Glass */ bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 /* Text Color */ text-emerald-700 font-bold /* Layout & Shadow */ flex items-center justify-center gap-2  transition-all shadow-sm active:scale-[0.98]"
-              >
+                className="w-full p-4 rounded-2xl /* The Green Tint Glass */ bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 /* Text Color */ text-emerald-700 font-bold /* Layout & Shadow */ flex items-center justify-center gap-2  transition-all shadow-sm active:scale-[0.98]">
                 <PenTool size={18} /> Post New Notice
               </button>
             )}
-
-            <button onClick={onLogout} className="w-full p-4 bg-white/30 border border-white/50 text-red-600 font-bold rounded-2xl flex items-center justify-center gap-2 hover:bg-red-50 hover:border-red-200 transition-colors shadow-sm">
+            <button onClick={onLogout} className="w-full p-4 bg-white/20 border border-white/40 text-red-600 font-bold rounded-2xl flex items-center justify-center gap-2 hover:bg-red-50 hover:border-red-200 transition-colors shadow-sm">
               <LogOut size={18} /> Logout
             </button>
           </div>
@@ -205,6 +211,15 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
       </div>
     </>
   );
+};
+
+// 3. Define Props Contract (Fixes Validation Warnings)
+Navbar.propTypes = {
+  username: PropTypes.string.isRequired,
+  userRole: PropTypes.string.isRequired,
+  onLogout: PropTypes.func.isRequired,
+  onCreateClick: PropTypes.func.isRequired,
+  onAdminClick: PropTypes.func.isRequired,
 };
 
 export default Navbar;
