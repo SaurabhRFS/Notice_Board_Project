@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, X } from 'lucide-react'; // <-- 1. NEW IMPORTS
-import AnimatedBackground from '../components/AnimatedBackground';
-import AdminSidebar from '../components/AdminSidebar';
-import UserManagement from '../components/UserManagement'; 
-import SubjectManagement from '../components/SubjectManagement';
+import { Menu, X } from 'lucide-react';
+
+// Updated Imports for Feature-Driven Architecture
+import AnimatedBackground from '../components/layout/AnimatedBackground';
+import AdminSidebar from '../components/layout/AdminSidebar';
+import UserManagement from '../features/admin/UserManagement'; 
+import SubjectManagement from '../features/admin/SubjectManagement';
 
 function AdminPage() {
   const navigate = useNavigate();
   
   // --- STATE ---
   const [activeTab, setActiveTab] = useState('users'); // 'users' or 'subjects'
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // <-- 2. NEW STATE
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Auth Check
   useEffect(() => {
@@ -39,7 +41,7 @@ function AdminPage() {
       
       <AnimatedBackground />
 
-      {/* --- 3. MOBILE HEADER (Visible only on small screens) --- */}
+      {/* --- MOBILE HEADER (Visible only on small screens) --- */}
       <div className="md:hidden fixed top-0 left-0 w-full z-50 bg-white/10 backdrop-blur-md border-b border-white/20 p-4 flex items-center justify-between">
         <h1 className="text-xl font-black text-slate-800 tracking-tighter">
           Admin<span className="text-blue-600">Panel</span>
@@ -52,14 +54,17 @@ function AdminPage() {
         </button>
       </div>
 
-      {/* --- 4. MOBILE DRAWER (Overlay + Sidebar) --- */}
+      {/* --- MOBILE DRAWER (Overlay + Sidebar) --- */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[60] md:hidden">
-          {/* Dark Backdrop */}
-          <div 
-            className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"
+          
+          {/* FIX: Replaced div with button for accessibility */}
+          <button 
+            type="button"
+            className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm w-full h-full border-none cursor-default"
             onClick={() => setIsMobileMenuOpen(false)}
-          ></div>
+            aria-label="Close Menu"
+          />
           
           {/* Slide-out Sidebar */}
           <div className="absolute top-0 left-0 w-3/4 max-w-xs h-full bg-white shadow-2xl animate-fade-in-up">
@@ -79,7 +84,7 @@ function AdminPage() {
         </div>
       )}
 
-      {/* 5. DESKTOP SIDEBAR (Hidden on mobile) */}
+      {/* DESKTOP SIDEBAR (Hidden on mobile) */}
       <div className="relative z-20 hidden md:block">
         <AdminSidebar 
           activeTab={activeTab} 
@@ -89,7 +94,7 @@ function AdminPage() {
         />
       </div>
 
-      {/* 6. MAIN CONTENT AREA (Adjusted padding for mobile header) */}
+      {/* MAIN CONTENT AREA */}
       <div className="flex-1 relative z-10 h-screen overflow-y-auto pt-20 md:pt-0">
         <div className="p-6 md:p-12 max-w-7xl mx-auto">
           
@@ -108,14 +113,9 @@ function AdminPage() {
           {/* DYNAMIC CONTENT SWITCHER */}
           <div className="animate-fade-in-up">
             {activeTab === 'users' ? (
-              
-              // --- PLACEHOLDER: USER TAB ---
               <UserManagement />
-
             ) : (
-              // --- PLACEHOLDER: SUBJECT TAB ---
               <SubjectManagement />
-
             )}
           </div>
 

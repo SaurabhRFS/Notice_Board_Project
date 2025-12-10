@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, AlertTriangle } from 'lucide-react';
-import AnimatedBackground from '../components/AnimatedBackground';
-import GlassCard from '../components/GlassCard';
+import AnimatedBackground from '../components/layout/AnimatedBackground';
+import GlassCard from '../components/ui/GlassCard';
 
 const NotFoundPage = () => {
   const navigate = useNavigate();

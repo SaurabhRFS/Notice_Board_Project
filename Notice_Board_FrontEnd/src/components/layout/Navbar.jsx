@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types'; // 1. Import PropTypes
+import PropTypes from 'prop-types';
 import {
   LogOut, Shield, PenTool, Menu, X, Sun, Moon, Sunset,
   Trophy, FileQuestion, Book, Calendar
 } from 'lucide-react';
-import GlassMenuCard from './GlassMenuCard';
+import GlassMenuCard from '../ui/GlassMenuCard'; // Ensure this path is correct based on your moves
 
 const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) => {
   const [greeting, setGreeting] = useState({ text: 'Hello', theme: 'morning', icon: null });
@@ -144,8 +144,6 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
       </nav>
 
       {/* --- PREMIUM DRAWER --- */}
-
-      {/* 2. Backdrop Fix (Using Button) */}
       <button
         type="button"
         className={`
@@ -195,13 +193,27 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
 
           {/* Footer Actions */}
           <div className="mt-auto pt-6 border-t border-white/30 space-y-4">
+            
+            {/* --- NEW: ADMIN PANEL BUTTON (MOBILE) --- */}
+            {userRole === 'ROLE_ADMIN' && (
+              <button
+                onClick={() => { onAdminClick(); setIsMenuOpen(false); }}
+                className="w-full p-4 rounded-2xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 text-purple-700 font-bold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98]"
+              >
+                <Shield size={18} /> Admin Panel
+              </button>
+            )}
+
+            {/* Post Notice Button */}
             {(userRole === 'ROLE_TEACHER' || userRole === 'ROLE_ADMIN') && (
               <button
                 onClick={() => { onCreateClick(); setIsMenuOpen(false); }}
-                className="w-full p-4 rounded-2xl /* The Green Tint Glass */ bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 /* Text Color */ text-emerald-700 font-bold /* Layout & Shadow */ flex items-center justify-center gap-2  transition-all shadow-sm active:scale-[0.98]">
+                className="w-full p-4 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-700 font-bold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98]">
                 <PenTool size={18} /> Post New Notice
               </button>
             )}
+
+            {/* Logout Button */}
             <button onClick={onLogout} className="w-full p-4 bg-white/20 border border-white/40 text-red-600 font-bold rounded-2xl flex items-center justify-center gap-2 hover:bg-red-50 hover:border-red-200 transition-colors shadow-sm">
               <LogOut size={18} /> Logout
             </button>
@@ -213,7 +225,6 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
   );
 };
 
-// 3. Define Props Contract (Fixes Validation Warnings)
 Navbar.propTypes = {
   username: PropTypes.string.isRequired,
   userRole: PropTypes.string.isRequired,

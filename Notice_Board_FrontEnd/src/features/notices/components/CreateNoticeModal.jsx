@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
 import { X, Pin, Loader2 } from 'lucide-react';
-import { API_BASE_URL } from '../config/apiConfig';
-import GlassCard from './GlassCard';
-import { useToast } from '../context/ToastContext';
+import api from '../../../services/api'; 
+import GlassCard from '../../../components/ui/GlassCard'; 
+import { useToast } from '../../../context/ToastContext'; 
 
 const CreateNoticeModal = ({ isOpen, onClose, onSuccess, branches, semesters, subjects }) => {
   const { addToast } = useToast();
@@ -36,14 +35,6 @@ const CreateNoticeModal = ({ isOpen, onClose, onSuccess, branches, semesters, su
     setIsCreating(true);
     setError('');
 
-    const token = localStorage.getItem('token');
-    const authConfig = {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data'
-      }
-    };
-
     const noticeData = {
       title,
       content,
@@ -64,7 +55,7 @@ const CreateNoticeModal = ({ isOpen, onClose, onSuccess, branches, semesters, su
     }
 
     try {
-      await axios.post(`${API_BASE_URL}/api/notices`, formData, authConfig);
+      await api.post('/api/notices', formData);
       
       addToast("Notice published successfully!", "success");
       
@@ -90,10 +81,9 @@ const CreateNoticeModal = ({ isOpen, onClose, onSuccess, branches, semesters, su
   };
 
   return (
-    // FIX: Changed 'items-center' to 'items-start' and added 'pt-24' to push it down below the navbar
     <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-24">
       
-      {/* Backdrop */}
+      {/* FIX: Use button for backdrop to satisfy a11y */}
       <button 
         type="button"
         className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm cursor-default w-full h-full border-none block" 
@@ -101,7 +91,6 @@ const CreateNoticeModal = ({ isOpen, onClose, onSuccess, branches, semesters, su
         aria-label="Close Modal" 
       />
 
-      {/* Modal Card */}
       <GlassCard className="!max-w-xl w-full relative z-10 animate-fade-in-up border-blue-200/50 max-h-[85vh] overflow-y-auto custom-scrollbar shadow-2xl">
         
         <div className="flex justify-between items-center mb-6">
@@ -112,10 +101,11 @@ const CreateNoticeModal = ({ isOpen, onClose, onSuccess, branches, semesters, su
         </div>
 
         <div className="space-y-4">
-          {/* Title */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-500 uppercase ml-1">Notice Title</label>
+            {/* FIX: Linked label to input */}
+            <label htmlFor="noticeTitle" className="text-xs font-bold text-slate-500 uppercase ml-1">Notice Title</label>
             <input 
+              id="noticeTitle"
               type="text" 
               className="w-full p-3 bg-white rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/50 outline-none font-bold text-slate-800 placeholder:text-slate-400" 
               placeholder="Enter title..."
@@ -124,10 +114,11 @@ const CreateNoticeModal = ({ isOpen, onClose, onSuccess, branches, semesters, su
             />
           </div>
 
-          {/* Content */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-500 uppercase ml-1">Content</label>
+            {/* FIX: Linked label to textarea */}
+            <label htmlFor="noticeContent" className="text-xs font-bold text-slate-500 uppercase ml-1">Content</label>
             <textarea 
+              id="noticeContent"
               className="w-full p-3 bg-white rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/50 outline-none h-40 font-medium text-slate-700 placeholder:text-slate-400 resize-none" 
               placeholder="What's happening?"
               value={content} 
@@ -135,11 +126,12 @@ const CreateNoticeModal = ({ isOpen, onClose, onSuccess, branches, semesters, su
             />
           </div>
 
-          {/* Branch & Subject Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-500 uppercase ml-1">Target Branch</label>
+              {/* FIX: Linked label to select */}
+              <label htmlFor="noticeBranch" className="text-xs font-bold text-slate-500 uppercase ml-1">Target Branch</label>
               <select 
+                id="noticeBranch"
                 value={branch} 
                 onChange={(e) => setBranch(e.target.value)} 
                 className="w-full p-3 bg-white rounded-xl border border-slate-200 text-sm font-bold text-slate-700 outline-none"
@@ -150,8 +142,10 @@ const CreateNoticeModal = ({ isOpen, onClose, onSuccess, branches, semesters, su
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-500 uppercase ml-1">Subject</label>
+              {/* FIX: Linked label to select */}
+              <label htmlFor="noticeSubject" className="text-xs font-bold text-slate-500 uppercase ml-1">Subject</label>
               <select 
+                id="noticeSubject"
                 value={subjectId} 
                 onChange={(e) => setSubjectId(e.target.value)} 
                 className="w-full p-3 bg-white rounded-xl border border-slate-200 text-sm font-bold text-slate-700 outline-none"
@@ -165,11 +159,12 @@ const CreateNoticeModal = ({ isOpen, onClose, onSuccess, branches, semesters, su
             </div>
           </div>
 
-          {/* Semesters & Date Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              <div className="space-y-1">
-               <label className="text-xs font-bold text-slate-500 uppercase ml-1">Target Semesters</label>
+               {/* FIX: Linked label to select */}
+               <label htmlFor="noticeSemesters" className="text-xs font-bold text-slate-500 uppercase ml-1">Target Semesters</label>
                <select 
+                 id="noticeSemesters"
                  multiple 
                  className="w-full p-2 bg-white/50 rounded-xl border border-slate-200 text-xs font-medium h-32" 
                  value={targetSemesters} 
@@ -181,8 +176,10 @@ const CreateNoticeModal = ({ isOpen, onClose, onSuccess, branches, semesters, su
 
              <div className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 uppercase ml-1">Expires On</label>
+                  {/* FIX: Linked label to input */}
+                  <label htmlFor="noticeExpiry" className="text-xs font-bold text-slate-500 uppercase ml-1">Expires On</label>
                   <input 
+                    id="noticeExpiry"
                     type="date" 
                     value={expiresAt} 
                     onChange={(e) => setExpiresAt(e.target.value)} 
@@ -198,9 +195,11 @@ const CreateNoticeModal = ({ isOpen, onClose, onSuccess, branches, semesters, su
                   <span className="text-sm font-bold">{isPinned ? "Pinned" : "Pin?"}</span>
                 </button>
 
-                {/* File Input */}
                 <div className="relative">
+                  {/* FIX: Added aria-label for accessibility since this input is invisible */}
                   <input 
+                    id="noticeFiles"
+                    aria-label="Upload files"
                     type="file" 
                     multiple 
                     onChange={(e) => setFiles([...files, ...Array.from(e.target.files)])} 
@@ -213,7 +212,6 @@ const CreateNoticeModal = ({ isOpen, onClose, onSuccess, branches, semesters, su
              </div>
           </div>
 
-          {/* File List */}
           {files.length > 0 && (
             <div className="flex flex-wrap gap-2 p-2 bg-slate-50 rounded-xl border border-slate-100">
               {files.map((file, idx) => (
@@ -225,7 +223,6 @@ const CreateNoticeModal = ({ isOpen, onClose, onSuccess, branches, semesters, su
             </div>
           )}
 
-          {/* Submit Button */}
           <button 
             onClick={handleSubmit} 
             disabled={isCreating}

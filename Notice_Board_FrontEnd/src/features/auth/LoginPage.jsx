@@ -1,89 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { auth, googleProvider } from '../config/firebase';
-import { signInWithPopup } from 'firebase/auth';
+import React from 'react';
 import { Mail, Lock, Zap, Eye, EyeOff } from 'lucide-react';
 
-import { loginUser, googleLoginUser } from '../services/authService';
-import GlassCard from '../components/GlassCard';
-import FormInput from '../components/FormInput';
-import PrimaryButton from '../components/PrimaryButton';
-import GoogleButton from '../components/GoogleButton';
-import AnimatedBackground from '../components/AnimatedBackground';
+// UI Components (Note the corrected paths)
+import GlassCard from '../../components/ui/GlassCard';
+import FormInput from '../../components/ui/FormInput';
+import PrimaryButton from '../../components/ui/PrimaryButton';
+import GoogleButton from '../../components/ui/GoogleButton';
+import AnimatedBackground from '../../components/layout/AnimatedBackground';
+
+// Hook
+import { useLogin } from './hooks/useLogin';
 
 function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-
-  // --- FIX 1: Auto-Redirect if already logged in ---
-  // If a user presses "Back" to get here, this kicks them forward immediately.
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      navigate('/', { replace: true });
-    }
-  }, [navigate]);
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
-    try {
-      const data = await loginUser(email, password);
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('userRole', data.role);
-      
-      // --- FIX 2: Use 'replace: true' ---
-      // This deletes the Login Page from history so "Back" closes the app (or goes to Google)
-      navigate('/', { replace: true });
-      
-    } catch (err) {
-      if (err.response?.status === 401) {
-        setError("Wrong email or password");
-      } else {
-        setError("Something went wrong. Try again.");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setError('');
-    setIsLoading(true);
-
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const idToken = await result.user.getIdToken();
-      const data = await googleLoginUser(idToken);
-
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('userRole', data.role);
-      
-      // --- FIX 2: Use 'replace: true' here too ---
-      navigate('/', { replace: true });
-      
-    } catch (err) {
-      if (err.code === "auth/popup-closed-by-user") {
-        setError("Google login cancelled.");
-      } 
-      else if (err.code === "auth/network-request-failed") {
-        setError("Network error. Check your internet.");
-      }
-      else if (err.response?.status === 500) {
-        setError("Server error during Google login.");
-      } else {
-        setError("Google login failed. Try again.");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const {
+    email, setEmail,
+    password, setPassword,
+    showPassword, setShowPassword,
+    error,
+    isLoading,
+    handleLocalLogin,
+    handleGoogleLogin
+  } = useLogin();
 
   return (
     <div className="min-h-screen w-full bg-slate-50 flex items-start pt-1 md:items-center md:pt-0 justify-center relative overflow-hidden">
@@ -92,9 +29,8 @@ function LoginPage() {
 
       <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 z-10 relative md:-mt-24">
         
-        {/* Left Column */}
+        {/* Left Column: Branding */}
         <div className="flex flex-col justify-center items-start p-6 md:p-16 relative">
-          
           <div className="flex items-center gap-3 mb-2 md:mb-6 animate-fade-in-up">
             <div className="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-500/30">
               <Zap size={28} className="text-white md:w-8 md:h-8" fill="currentColor" />
@@ -114,7 +50,7 @@ function LoginPage() {
           </p>
         </div>
 
-        {/* Right Column (Glass Form) */}
+        {/* Right Column: Glass Form */}
         <div className="flex items-center justify-center p-4 md:p-8">
           <GlassCard>
             <div className="mb-8">
@@ -128,7 +64,7 @@ function LoginPage() {
               </div>
             )}
 
-            <form onSubmit={handleLogin} className="space-y-5">
+            <form onSubmit={handleLocalLogin} className="space-y-5">
               <FormInput 
                 label="Email" 
                 type="email" 
