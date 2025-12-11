@@ -1,19 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useNavigate } from 'react-router-dom'; // 1. Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import {
   LogOut, Shield, PenTool, Menu, X, Sun, Moon, Sunset,
-  Trophy, FileQuestion, Book, Calendar, FlaskConical, // 2. Import FlaskConical
-  ShoppingBag, Users
+  Trophy, FileQuestion, Book, Calendar, FlaskConical,
+  ShoppingBag, Users, Home 
 } from 'lucide-react';
 import GlassMenuCard from '../ui/GlassMenuCard'; 
 
 const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) => {
-  const navigate = useNavigate(); // 3. Initialize hook
+  const navigate = useNavigate();
   const [greeting, setGreeting] = useState({ text: 'Hello', theme: 'morning', icon: null });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const menuItems = [
+    // 1. Home is kept here in the menu list
+    {
+      id: 'home',
+      label: 'Home Dashboard',
+      icon: Home,
+      color: 'text-sky-600',
+      bg: 'bg-sky-50',
+      link: '/',
+      isExternal: false
+    },
     {
       id: 'results',
       label: 'Exam Results',
@@ -66,17 +76,16 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
       bg: 'bg-rose-50',
       link: '/labs', 
       isExternal: false,
-      // REMOVED 'comingSoon' -> Now it is active!
     },
     {
-      id: 'community', // <--- 2. NEW FEATURE
+      id: 'community',
       label: 'Community',
       icon: Users,
       color: 'text-indigo-600',
       bg: 'bg-indigo-50',
       link: '/community',
       isExternal: false,
-      comingSoon: true // Locked for now
+      comingSoon: true 
     },
   ];
 
@@ -108,7 +117,7 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
     if (item.isExternal) {
       window.open(item.link, '_blank');
     } else {
-      navigate(item.link); // 4. Proper Internal Navigation
+      navigate(item.link);
     }
     setIsMenuOpen(false);
   };
@@ -120,7 +129,7 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
         <div className="relative rounded-full border border-white/40 bg-white/20 backdrop-blur-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),0_8px_20px_rgba(0,0,0,0.05)] px-8 py-3 flex items-center justify-between transition-all hover:bg-white/30">
           <div className="absolute inset-x-4 top-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent opacity-50 rounded-t-full pointer-events-none" />
 
-          {/* 5. CLICKABLE BRAND LOGO (Go Home) */}
+          {/* CLICKABLE BRAND LOGO (Go Home) */}
           <button 
             onClick={() => navigate('/')}
             className="flex flex-col leading-none select-none z-10 text-left outline-none"
@@ -138,6 +147,8 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
           </div>
 
           <div className="flex items-center gap-3 z-10">
+            {/* 2. Removed the explicit Home button from here */}
+
             {(userRole === 'ROLE_TEACHER' || userRole === 'ROLE_ADMIN') && (
               <button onClick={onCreateClick} className="group relative px-5 py-2.5 rounded-full bg-white/30 border border-white/50 hover:bg-white/50 transition-all flex items-center gap-2 shadow-sm">
                 <PenTool size={16} className="text-slate-700 group-hover:text-blue-600" />
@@ -162,7 +173,7 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
         <div className="rounded-2xl border border-white/40 bg-white/30 backdrop-blur-2xl shadow-lg px-5 py-3 flex justify-between items-center relative overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
           
-          {/* 6. CLICKABLE BRAND LOGO (Mobile) */}
+          {/* CLICKABLE BRAND LOGO (Mobile) */}
           <button 
             onClick={() => navigate('/')}
             className="flex flex-col leading-none z-10 text-left outline-none"
