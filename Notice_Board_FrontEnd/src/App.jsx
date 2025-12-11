@@ -11,8 +11,8 @@ import AuthCallback from './features/auth/AuthCallback';
 // 2. Lazy Load Admin Page
 // This tells React: "Don't import this file until we actually need it."
 const AdminPage = React.lazy(() => import('./pages/AdminPage'));
-
 const BuySellPage = React.lazy(() => import('./features/marketplace/BuySellPage'));
+const CalendarPage = React.lazy(() => import('./features/calendar/CalendarPage'));
 
 // Context
 import { ToastProvider } from './context/ToastContext';
@@ -48,6 +48,7 @@ function App() {
             />
             <Route path="/labs" element={ <Suspense fallback={<PageLoader />}> <LabsPage /> </Suspense>} />
             <Route path="/buy-sell" element={<Suspense fallback={<PageLoader />}> <BuySellPage /> </Suspense>} />
+            <Route path="/calendar" element={<Suspense fallback={<PageLoader />}> <CalendarPage /> </Suspense>} />
             
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

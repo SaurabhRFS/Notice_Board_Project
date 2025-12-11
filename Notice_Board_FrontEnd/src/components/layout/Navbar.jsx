@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'; // 1. Import useNavigate
 import {
   LogOut, Shield, PenTool, Menu, X, Sun, Moon, Sunset,
   Trophy, FileQuestion, Book, Calendar, FlaskConical, // 2. Import FlaskConical
-  ShoppingBag
+  ShoppingBag, Users
 } from 'lucide-react';
 import GlassMenuCard from '../ui/GlassMenuCard'; 
 
@@ -24,15 +24,15 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
       isExternal: true
     },
     {
-  id: 'buysell',
-  label: 'Buy & Sell',
-  icon: ShoppingBag,
-  color: 'text-emerald-600',
-  bg: 'bg-emerald-50',
-  link: '/buy-sell',
-  isExternal: false,
-  comingSoon: false
-},
+      id: 'buysell',
+      label: 'Buy & Sell',
+      icon: ShoppingBag,
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-50',
+      link: '/buy-sell',
+      isExternal: false,
+      comingSoon: false
+    },
     {
       id: 'pyq',
       label: 'Previous Year Qs',
@@ -55,7 +55,8 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
       icon: Calendar,
       color: 'text-teal-600',
       bg: 'bg-teal-50',
-      comingSoon: true
+      link: '/calendar',
+      comingSoon: false
     },
     {
       id: 'labs',
@@ -66,6 +67,16 @@ const Navbar = ({ username, userRole, onLogout, onCreateClick, onAdminClick }) =
       link: '/labs', 
       isExternal: false,
       // REMOVED 'comingSoon' -> Now it is active!
+    },
+    {
+      id: 'community', // <--- 2. NEW FEATURE
+      label: 'Community',
+      icon: Users,
+      color: 'text-indigo-600',
+      bg: 'bg-indigo-50',
+      link: '/community',
+      isExternal: false,
+      comingSoon: true // Locked for now
     },
   ];
 
