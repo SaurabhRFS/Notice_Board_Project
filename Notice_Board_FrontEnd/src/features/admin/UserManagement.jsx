@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Shield, GraduationCap, User, Loader2, CheckCircle2 } from 'lucide-react';
 import { useUsers } from './hooks/useUsers';
+import TableSkeleton from '../../components/feedback/TableSkeleton';
 
 const UserManagement = () => {
   // 1. Use Hook
@@ -35,7 +36,7 @@ const UserManagement = () => {
   };
 
   const renderUserList = () => {
-    if (isLoading) return <div className="p-8 flex justify-center text-slate-400"><Loader2 className="animate-spin" /></div>;
+    if (isLoading) return <TableSkeleton />; // <--- REPLACED SPINNER;
     if (filteredUsers.length === 0) return <div className="p-8 text-center text-slate-500 font-medium">No users found.</div>;
 
     return filteredUsers.map(user => (

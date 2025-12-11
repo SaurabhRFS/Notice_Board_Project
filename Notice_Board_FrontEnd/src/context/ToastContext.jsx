@@ -9,7 +9,7 @@ export const ToastProvider = ({ children }) => {
 
   // 1. Stable Add Function
   const addToast = useCallback((message, type = 'info', duration = 4000) => {
-    const id = Date.now(); 
+    const id = Date.now();
     setToasts((prev) => [...prev, { id, message, type, duration }]);
   }, []);
 
@@ -21,18 +21,25 @@ export const ToastProvider = ({ children }) => {
   // 3. FIX: Memoize the context value to prevent re-render warnings
   const contextValue = useMemo(() => ({ addToast }), [addToast]);
 
+  // ... imports
+
   return (
     <ToastContext.Provider value={contextValue}>
       {children}
-      
-      {/* Floating Toast Container */}
-      <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
+
+      {/* FIX: Responsive Positioning 
+          - Mobile: top-6, left-1/2 (centered horizontally)
+          - Desktop (md): bottom-6, right-6 (standard corner)
+      */}
+      <div className="
+        fixed z-[200] flex flex-col gap-3 pointer-events-none
+        top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm
+        md:top-auto md:left-auto md:translate-x-0
+        md:bottom-6 md:right-6
+      ">
         {toasts.map((toast) => (
-          <div key={toast.id} className="pointer-events-auto">
-             <Toast 
-               {...toast} 
-               onClose={removeToast} 
-             />
+          <div key={toast.id} className="pointer-events-auto w-full">
+            <Toast {...toast} onClose={removeToast} />
           </div>
         ))}
       </div>

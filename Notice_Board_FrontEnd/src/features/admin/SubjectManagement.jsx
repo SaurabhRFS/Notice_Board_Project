@@ -7,6 +7,7 @@ import {
 import DeleteConfirmModal from '../../components/feedback/DeleteConfirmModal';
 import GlassCard from '../../components/ui/GlassCard';
 import { useSubjects } from './hooks/useSubjects';
+import TableSkeleton from '../../components/feedback/TableSkeleton';
 
 const SubjectManagement = () => {
   // 1. Use Hook
@@ -64,11 +65,7 @@ const SubjectManagement = () => {
   // --- Helper: Clean Logic for Table Body ---
   const renderTableBody = () => {
     if (isLoading) {
-      return (
-        <div className="p-10 flex justify-center text-slate-400">
-          <Loader2 className="animate-spin" />
-        </div>
-      );
+    return <TableSkeleton />; // <--- REPLACED SPINNER
     }
 
     if (subjects.length === 0) {
