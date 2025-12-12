@@ -1,8 +1,13 @@
 import React from 'react';
 
-const AnimatedBackground = () => {
+// OPTIMIZATION: Memoize to prevent re-renders when parent state changes (like route transitions)
+const AnimatedBackground = React.memo(() => {
   return (
-    <div className="fixed top-0 left-0 w-screen h-screen overflow-hidden z-0 pointer-events-none">
+    // OPTIMIZATION: 'translate-z-0' forces hardware acceleration (GPU)
+    <div 
+      className="fixed top-0 left-0 w-screen h-screen overflow-hidden z-0 pointer-events-none"
+      style={{ transform: 'translateZ(0)', willChange: 'transform' }}
+    >
 
       {/* --- GIANT BLOBS (Sharper Blur) --- */}
 
@@ -46,6 +51,6 @@ const AnimatedBackground = () => {
 
     </div>
   );
-};
+});
 
 export default AnimatedBackground;

@@ -90,7 +90,11 @@ function HomePage() {
       <Navbar 
         username={username}
         userRole={userRole}
-        onLogout={() => { localStorage.clear(); navigate('/login'); }}
+        onLogout={() => { 
+          localStorage.removeItem('token'); 
+          localStorage.removeItem('userRole'); 
+          navigate('/login'); 
+        }}
         onCreateClick={() => setIsFormVisible(true)}
         onAdminClick={() => navigate('/admin')}
       />

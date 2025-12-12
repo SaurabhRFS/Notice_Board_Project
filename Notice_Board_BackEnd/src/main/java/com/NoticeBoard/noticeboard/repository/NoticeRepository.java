@@ -3,37 +3,41 @@ package com.NoticeBoard.noticeboard.repository;
 import com.NoticeBoard.noticeboard.model.Branch;
 import com.NoticeBoard.noticeboard.model.Notice;
 import com.NoticeBoard.noticeboard.model.Semester;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
-    // --- THE NEW "SMART FILTER" QUERY ---
+    // --- STABLE & FAST VERSION ---
+    // 1. LEFT JOIN FETCH n.author -> Gets Author instantly
+    // 2. MEMBER OF -> Filters semesters cleanly
+    // 3. NO GROUP BY / DISTINCT -> Prevents SQL Crashes
+    
     @Query(
         value = "SELECT n FROM Notice n " +
-                "LEFT JOIN n.targetSemesters s " +
+                "LEFT JOIN FETCH n.author " +
                 "WHERE " +
-                // Filter 1: Subject (if provided)
                 "(:subjectId IS NULL OR n.subject.id = :subjectId) " +
-                
-                // Filter 2: Branch (if provided, or 'GENERAL')
                 "AND (:branch IS NULL OR n.targetBranch = :branch OR n.targetBranch = 'GENERAL') " +
-                
-                // Filter 3: Semester (if provided, or 'ALL_SEMESTERS')
-                "AND (:semester IS NULL OR s = :semester OR s = 'ALL_SEMESTERS' OR n.targetSemesters IS EMPTY) " +
-                
-                "GROUP BY n.id " +
-                "ORDER BY n.isPinned DESC, n.updatedAt DESC"
+                "AND (:semester IS NULL OR n.targetSemesters IS EMPTY " +
+                "     OR :semester MEMBER OF n.targetSemesters " +
+                "     OR 'ALL_SEMESTERS' MEMBER OF n.targetSemesters)",
+        
+        countQuery = "SELECT count(n) FROM Notice n " +
+                     "WHERE " +
+                     "(:subjectId IS NULL OR n.subject.id = :subjectId) " +
+                     "AND (:branch IS NULL OR n.targetBranch = :branch OR n.targetBranch = 'GENERAL') " +
+                     "AND (:semester IS NULL OR n.targetSemesters IS EMPTY " +
+                     "     OR :semester MEMBER OF n.targetSemesters " +
+                     "     OR 'ALL_SEMESTERS' MEMBER OF n.targetSemesters)"
     )
-    List<Notice> findFilteredNotices(
+    Page<Notice> findFilteredNotices(
         @Param("subjectId") Long subjectId, 
         @Param("branch") Branch branch, 
-        @Param("semester") Semester semester
+        @Param("semester") Semester semester,
+        Pageable pageable
     );
-
-    // This is still used for Admins/Teachers to see everything
-    List<Notice> findAllByOrderByIsPinnedDescUpdatedAtDesc();
 }

@@ -3,13 +3,21 @@ package com.NoticeBoard.noticeboard.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
-import java.util.ArrayList; // <-- IMPORT
+import java.util.ArrayList;
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonProperty; // <--- Add this import
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.annotations.BatchSize;
 
 @Data
 @Entity
-@Table(name = "notices")
+// --- 1. OPTIMIZATION: Database Indexes ---
+// This acts like a "Fast Lane" for your specific filters and sorting.
+@Table(name = "notices", indexes = {
+    @Index(name = "idx_notice_branch", columnList = "target_branch"),
+    @Index(name = "idx_notice_subject", columnList = "subject_id"),
+    // This index makes the sorting (Pinned First -> Newest) instant
+    @Index(name = "idx_notice_sort", columnList = "is_pinned, updated_at DESC")
+})
 public class Notice {
 
     @Id
@@ -33,20 +41,21 @@ public class Notice {
     private LocalDateTime expiresAt;
 
     @Column(name = "is_pinned", nullable = false)
-    @JsonProperty("isPinned") // <--- This forces the name to stay "isPinned"
+    @JsonProperty("isPinned")
     private boolean isPinned = false;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "target_branch", nullable = true)
     private Branch targetBranch;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
     @CollectionTable(name = "notice_target_semesters", joinColumns = @JoinColumn(name = "notice_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "semester", nullable = false)
-    private List<Semester> targetSemesters = new ArrayList<>(); // <-- Default empty list
+    private List<Semester> targetSemesters = new ArrayList<>();
 
-    @ManyToOne
+    @ManyToOne 
     @JoinColumn(name = "subject_id", nullable = true)
     private Subject subject;
 
@@ -54,10 +63,11 @@ public class Notice {
     @JoinColumn(name = "author_user_id", nullable = false)
     private User author;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
     @CollectionTable(name = "notice_attachments", joinColumns = @JoinColumn(name = "notice_id"))
     @Column(name = "file_url", columnDefinition = "TEXT")
-    private List<String> attachmentUrls = new ArrayList<>(); // <-- Default empty list
+    private List<String> attachmentUrls = new ArrayList<>();
 
     
     @PrePersist

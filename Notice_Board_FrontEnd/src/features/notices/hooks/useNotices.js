@@ -1,4 +1,3 @@
-// src/features/notices/hooks/useNotices.js
 import { useState, useEffect, useMemo } from 'react';
 import { fetchNotices, deleteNotice, fetchFilters } from '../../../services/noticeService';
 import { useToast } from '../../../context/ToastContext';
@@ -6,41 +5,55 @@ import { useToast } from '../../../context/ToastContext';
 export const useNotices = () => {
   const { addToast } = useToast();
   
-  // Notice State
-  const [notices, setNotices] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // 1. Load Notices from Session Cache (Instant "Back" button support)
+  const [notices, setNotices] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem('campus_notices_cache');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) { return []; }
+  });
+
+  const [isLoading, setIsLoading] = useState(() => !sessionStorage.getItem('campus_notices_cache'));
   
-  // Filter Data State
-  const [filterData, setFilterData] = useState({ branches: [], semesters: [], subjects: [] });
+  // --- 2. OPTIMIZATION: Load Filters from LocalStorage (0ms Load) ---
+  const [filterData, setFilterData] = useState(() => {
+    try {
+      const cachedFilters = localStorage.getItem('campus_filter_options');
+      return cachedFilters ? JSON.parse(cachedFilters) : { branches: [], semesters: [], subjects: [] };
+    } catch (e) { return { branches: [], semesters: [], subjects: [] }; }
+  });
   
-  // Active Filter State
   const [filters, setFilters] = useState({
     branch: localStorage.getItem('filter_branch') || '',
     semester: localStorage.getItem('filter_semester') || '',
     subjectId: ''
   });
 
-  // --- Actions ---
-
-  // 1. Load Filter Options (Branches, etc.)
+  // --- 3. FETCH FILTERS (Only if missing) ---
   useEffect(() => {
     const loadFilters = async () => {
+      // If we already have data, don't waste network bandwidth!
+      if (filterData.branches.length > 0) return;
+
       try {
         const data = await fetchFilters();
         setFilterData(data);
+        // Save for next time (Persistent Cache)
+        localStorage.setItem('campus_filter_options', JSON.stringify(data));
       } catch (err) {
         console.error("Failed to load filters", err);
       }
     };
     loadFilters();
-  }, []);
+  }, [filterData.branches.length]); // Only run if branches are empty
 
-  // 2. Load Notices (Triggers when filters change)
+  // 4. Manual Search Logic
   const loadNotices = async () => {
     setIsLoading(true);
     try {
       const data = await fetchNotices(filters);
       setNotices(data);
+      sessionStorage.setItem('campus_notices_cache', JSON.stringify(data));
     } catch (err) {
       console.error(err);
       addToast("Failed to load notices", "error");
@@ -49,32 +62,30 @@ export const useNotices = () => {
     }
   };
 
-  // Persist filters & Reload notices
+  // Persist user preferences
   useEffect(() => {
     localStorage.setItem('filter_branch', filters.branch);
     localStorage.setItem('filter_semester', filters.semester);
-    loadNotices();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
-  // 3. Delete Logic
+  // Initial Load
+  useEffect(() => {
+    loadNotices();
+  }, []);
+
   const handleDelete = async (id) => {
     try {
       await deleteNotice(id);
       addToast("Notice deleted successfully", "success");
-      // If loadNotices is available in scope, call it. 
-      // If this is inside the hook, use the function responsible for refreshing.
       loadNotices(); 
       return true;
     } catch (error) {
-      // FIX: Log the error to the console so it is "handled"
       console.error("Delete failed:", error); 
       addToast("Failed to delete notice", "error");
       return false;
     }
   };
 
-  // 4. Computed Subjects (Dependent on active filters)
   const availableSubjects = useMemo(() => {
     return filterData.subjects.filter(subject => {
       const branchMatch = !filters.branch || subject.branch === filters.branch;

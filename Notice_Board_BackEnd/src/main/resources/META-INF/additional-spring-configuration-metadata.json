@@ -1,0 +1,34 @@
+{
+  "properties": [
+    {
+      "name": "admin.password",
+      "type": "java.lang.String",
+      "description": "Default password for the admin account."
+    },
+    {
+      "name": "teacher.password",
+      "type": "java.lang.String",
+      "description": "Default password for the teacher account."
+    },
+    {
+      "name": "student.password",
+      "type": "java.lang.String",
+      "description": "Default password for the student account."
+    },
+    {
+      "name": "jwt.secret",
+      "type": "java.lang.String",
+      "description": "Secret key used for signing JWT tokens."
+    },
+    {
+      "name": "cloudinary.url",
+      "type": "java.lang.String",
+      "description": "Connection URL for Cloudinary storage."
+    },
+    {
+      "name": "firebase.credentials.json",
+      "type": "java.lang.String",
+      "description": "JSON string containing Firebase service account credentials."
+    }
+  ]
+}

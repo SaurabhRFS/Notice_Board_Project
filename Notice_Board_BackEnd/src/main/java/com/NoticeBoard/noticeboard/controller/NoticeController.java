@@ -30,21 +30,16 @@ public class NoticeController {
         this.objectMapper.registerModule(new JavaTimeModule());
     }
 
-    // --- UPDATED CREATE ENDPOINT ---
     @PostMapping
     public ResponseEntity<Notice> createNotice(
         @RequestPart("notice") String noticeRequestJson, 
-        // 1. CHANGE: Accept a List<MultipartFile> and match the key "files"
         @RequestPart(value = "files", required = false) List<MultipartFile> files, 
         Authentication authentication
     ) {
         try {
             NoticeRequest noticeRequest = objectMapper.readValue(noticeRequestJson, NoticeRequest.class);
             String authorEmail = authentication.getName();
-
-            // 2. Pass the list to the service
             Notice newNotice = noticeService.createNotice(noticeRequest, authorEmail, files);
-            
             return new ResponseEntity<>(newNotice, HttpStatus.CREATED);
         } catch (Exception e) {
             e.printStackTrace();
@@ -52,14 +47,17 @@ public class NoticeController {
         }
     }
 
-    // ... (Keep getFilteredNotices and deleteNotice as they were) ...
+    // --- UPDATED: GET Endpoint with Pagination ---
+    // Change return type to Slice
     @GetMapping
-    public ResponseEntity<List<Notice>> getFilteredNotices(
+    public ResponseEntity<org.springframework.data.domain.Slice<Notice>> getFilteredNotices(
         @RequestParam(required = false) Long subjectId,
         @RequestParam(required = false) Branch branch,
-        @RequestParam(required = false) Semester semester
+        @RequestParam(required = false) Semester semester,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
     ) {
-        List<Notice> notices = noticeService.findFilteredNotices(subjectId, branch, semester);
+        org.springframework.data.domain.Slice<Notice> notices = noticeService.findFilteredNotices(subjectId, branch, semester, page, size);
         return ResponseEntity.ok(notices);
     }
 

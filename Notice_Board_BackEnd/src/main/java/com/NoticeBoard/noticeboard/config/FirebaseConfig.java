@@ -15,16 +15,15 @@ import java.nio.charset.StandardCharsets;
 @Configuration
 public class FirebaseConfig {
 
-    // This tells Spring: "Get the JSON string from the environment variable"
     @Value("${firebase.credentials.json}")
     private String firebaseJson;
 
     @Bean
     public FirebaseApp firebaseApp() throws IOException {
-        // Convert the JSON string into a stream that Firebase understands
         InputStream serviceAccountStream = new ByteArrayInputStream(firebaseJson.getBytes(StandardCharsets.UTF_8));
 
-        FirebaseOptions options = new FirebaseOptions.Builder()
+        // --- FIX: Use the static .builder() method ---
+        FirebaseOptions options = FirebaseOptions.builder()
             .setCredentials(GoogleCredentials.fromStream(serviceAccountStream))
             .build();
 

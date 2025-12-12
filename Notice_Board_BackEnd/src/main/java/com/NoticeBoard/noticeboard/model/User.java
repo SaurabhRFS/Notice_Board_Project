@@ -1,5 +1,6 @@
 package com.NoticeBoard.noticeboard.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore; // <-- 1. Import This
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -10,18 +11,20 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id") // Added a column name for consistency
+    @Column(name = "user_id")
     private Long id;
 
-    // --- THIS IS THE FIELD THAT WAS MISSING ---
     @Column(name = "Email", nullable = false, unique = true)
     private String email;
-    // ------------------------------------------
 
     @Column(name = "User_Name", nullable = false)
     private String username;
 
-    @Column(nullable = true) // Optional for Google users
+    // --- 2. OPTIMIZATION: Hide Password ---
+    // This stops the password hash from being sent to the frontend.
+    // Smaller Data = Faster Download.
+    @JsonIgnore 
+    @Column(nullable = true)
     private String password;
 
     @Enumerated(EnumType.STRING)

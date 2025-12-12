@@ -20,7 +20,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-// New imports for the Popup Header Fix
+// Popup Header Fix Imports
 import org.springframework.security.web.header.writers.CrossOriginOpenerPolicyHeaderWriter.CrossOriginOpenerPolicy;
 import org.springframework.security.web.header.writers.CrossOriginEmbedderPolicyHeaderWriter.CrossOriginEmbedderPolicy;
 
@@ -48,8 +48,8 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService); 
+        // --- FIX: Use Constructor Injection ---
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
@@ -65,6 +65,9 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
         
+        // Performance: Cache Preflight
+        configuration.setMaxAge(3600L); 
+        
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -77,7 +80,7 @@ public class SecurityConfig {
             .cors(corsConfig -> corsConfig.configurationSource(corsConfigurationSource()))
             .csrf(csrfConfig -> csrfConfig.disable())
 
-            // --- 1. HEADER FIX FOR GOOGLE POPUP ---
+            // Google Popup Headers
             .headers(headers -> headers
                 .crossOriginOpenerPolicy(policy -> policy
                     .policy(CrossOriginOpenerPolicy.SAME_ORIGIN_ALLOW_POPUPS)
@@ -93,25 +96,19 @@ public class SecurityConfig {
                 )
             )
             .authorizeHttpRequests(auth -> auth
-                // 2. Admin Only Routes
                 .requestMatchers("/api/admin/**").hasRole("ADMIN") 
-                
-                // --- 3. THE FIX: ALLOW STUDENTS TO SEE DROPDOWNS ---
                 .requestMatchers("/api/data/**").authenticated() 
                 .requestMatchers("/api/profile/**").authenticated()
 
-                // 4. Public Routes
                 .requestMatchers("/api").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/login/oauth2/**").permitAll()
+                .requestMatchers("/error").permitAll()
 
-                // 5. Notice Permissions (Viewing allowed for everyone logged in)
                 .requestMatchers(HttpMethod.GET, "/api/notices", "/api/notices/**").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
-                // Creating/Deleting Notices (Teachers/Admins only)
                 .requestMatchers(HttpMethod.POST, "/api/notices", "/api/notices/**").hasAnyRole("TEACHER", "ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/notices/**").hasAnyRole("TEACHER", "ADMIN")
                 
-                // 6. Catch-all
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

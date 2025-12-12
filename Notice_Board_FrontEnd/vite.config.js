@@ -7,8 +7,24 @@ export default defineConfig({
   server: {
     port: 5173,
     headers: {
-      //It matches Google's security policy.
       "Cross-Origin-Opener-Policy": "same-origin-allow-popups"
+    }
+  },
+  build: {
+    // 1. Minify using 'esbuild' (Fastest & smallest)
+    minify: 'esbuild',
+    // 2. Manual Chunk Split (The Network Optimization)
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Keep React core separate (cached longer)
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          // Keep Firebase separate (it's heavy)
+          'firebase-vendor': ['firebase/app', 'firebase/auth'],
+          // Keep UI icons separate
+          'ui-vendor': ['lucide-react']
+        }
+      }
     }
   }
 })

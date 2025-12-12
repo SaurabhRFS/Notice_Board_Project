@@ -1,9 +1,18 @@
 import api from './api';
 
 export const fetchNotices = async (filters) => {
-  // api.get automatically adds the token!
-  const response = await api.get('/api/notices', { params: filters });
-  return response.data;
+  // 1. We now ask for specific pages (default to page 0, 20 items)
+  const response = await api.get('/api/notices', { 
+    params: {
+      ...filters,
+      page: 0,
+      size: 20 
+    }
+  });
+  
+  // 2. IMPORTANT FIX: The data is now inside '.content'
+  // If we don't do this, the app tries to read the whole object as a list and fails.
+  return response.data.content || [];
 };
 
 export const deleteNotice = async (id) => {

@@ -6,7 +6,44 @@
 body {
   background-color: #f8fafc;
   color: #1e293b;
-  /* CHANGE THIS LINE FROM 'Poppins' TO 'Outfit' */
   font-family: 'Outfit', sans-serif;
   overflow-x: hidden;
+  /* 1. Premium Text Rendering (Crisper text) */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 2. Custom Scrollbar (Cleaner look, feels faster) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 3. Performance Utilities (REQUIRED for Step 1 to work) */
+@layer utilities {
+  .translate-z-0 {
+    transform: translateZ(0); /* Forces GPU Acceleration */
+  }
+  .will-change-transform {
+    will-change: transform;
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  /* Fixes 3D glitching in Safari */
+  .perspective-1200 {
+    perspective: 1200px;
+  }
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
 }
